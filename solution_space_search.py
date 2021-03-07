@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from pprint import pprint
 from time import time
 
-from requirement_functions_v2 import *
+from requirement_functions import *
 
 np.random.seed(7)
 
@@ -158,7 +158,7 @@ R = [
     R_res,
 ]
 
-N = 1000000
+N = 100
 t0 = time()
 print("\nTime started")
 F = _generate_points(Omega, N)
