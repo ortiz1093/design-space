@@ -1,4 +1,19 @@
 from datetime import datetime
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+
+def continuous_continuous_space(rangeA, rangeB, color='plum'):
+    x0, x1 = min(rangeA), max(rangeA)
+    y0, y1 = min(rangeB), max(rangeB)
+
+    return go.Scatter(
+        x=[x0, x1, x1, x0, x0],
+        y=[y0, y0, y1, y1, y0],
+        fill='toself',
+        fillcolor=color,
+        line=dict(color=color)
+    )
 
 
 class Requirement:
@@ -122,7 +137,7 @@ class RequirementSet:
         flag = True
         while flag:
             flag = True if cursor._Requirement__next else False
-            print("\t", cursor.text)
+            print("\t", cursor.symbol + ": ", cursor.text, cursor.values)
             cursor = cursor._Requirement__next
         print()
 
@@ -170,6 +185,28 @@ class Problem:
     def show_param_set(self):
         print("A = ", self.A)
 
+    def _generate_problem_space(self, pairwise=True, color='plum'):
+        N_axes = len(self.R)
+        probFig = make_subplots(rows=N_axes-1, cols=N_axes-1)
+        if pairwise:
+            for i in range(1, N_axes):
+                for ii in range(i, N_axes):
+                    ReqA = self.R[ii].values
+                    ReqB = self.R[i-1].values
+                    probFig.add_trace(
+                        continuous_continuous_space(ReqA, ReqB,
+                                                    color=color),
+                        row=i, col=ii
+                    )
+
+                    if i == ii:
+                        probFig.update_yaxes(title_text=self.R[i-1].symbol,
+                                             row=i, col=ii)
+                        probFig.update_xaxes(title_text=self.R[ii].symbol,
+                                             row=i, col=ii)
+
+        probFig.show()
+
 
 if __name__ == "__main__":
     printer = Problem()
@@ -177,14 +214,14 @@ if __name__ == "__main__":
 
     text3 = "This is requirement 3"
     symbol3 = "a3"
-    values3 = [1, 2, 3, 4]
+    values3 = [1, 4]
     printer.add_requirement(text=text3, symbol=symbol3, values=values3)
 
     text4 = "This is requirement 4"
     symbol4 = "a4"
-    values4 = [1, 4]
+    values4 = [0, 100]
     printer.add_requirement(text=text4, symbol=symbol4, values=values4)
 
     printer.R()
     printer.show_param_set()
-    print("Number of requirements:", len(printer.R))
+    printer._generate_problem_space()
