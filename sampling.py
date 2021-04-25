@@ -5,7 +5,7 @@ def _stratified_sampling(low, high, divisions=10):
 
     divs = np.linspace(low, high, divisions+1)
     # print(divs)
-    
+
     return np.random.rand(*divs[:-1].shape)*np.diff(divs) + divs[:-1]
 
 
@@ -16,7 +16,7 @@ def _sample_hypercube(axes, divisions=10):
         axis_samples = _stratified_sampling(*axis, divisions=divisions)
         np.random.shuffle(axis_samples)
         cube = np.vstack((cube, axis_samples))
-    
+
     return cube
 
 
@@ -27,9 +27,9 @@ def _sample_hypercube(axes, divisions=10):
 
 if __name__ == "__main__":
     Omega = {
-        'gantry_length': [10.0, 30.00],
-        'gantry_width': [0.5, 3],
-        'gantry_height': [0.1, 1.5]
+        'gantry_length': [5.0, 30.00],
+        'gantry_width': [0.36, 1.5],
+        'gantry_height': [0.06, 0.75]
     }
 
     div = 15
@@ -40,9 +40,9 @@ if __name__ == "__main__":
     for i in range(div):
         height = outer_cube[2, i]
         width = outer_cube[1, i]
-        length = outer_cube[0,i]
-        floor_thickness = [0.050, height-0.00001]
-        wall_thickness = [0.050, min(width/2-0.125, (length - 3)/6)]
+        length = outer_cube[0, i]
+        floor_thickness = [0.050, min(0.2, height-0.00001)]
+        wall_thickness = [0.050, min(0.125, width/2-0.125, (length - 3)/6)]
         inner_axes = [floor_thickness, wall_thickness]
         inner_cube = _sample_hypercube(inner_axes, divisions=div)
         outer_params = np.tile(outer_cube[:, i], [div, 1]).T

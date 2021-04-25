@@ -2,3 +2,6 @@ thesisEnv
 .vscode
 .idea
 ExampleSpaces.m
+*.xlsx
+*.doc
+
