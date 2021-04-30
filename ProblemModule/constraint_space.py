@@ -35,18 +35,19 @@ def continuous_continuous_space(rangeA, rangeB, color='plum', name=None,
 class ConstraintSpace:
     def __init__(self):
         self.requirement_set = None
+        self.figure = None
 
     def set_requirements(self, requirement_set):
         self.requirement_set = requirement_set
 
-    def show_problem_space(self, color='plum'):
+    def build_problem_space(self, color='plum'):
         N_axes = len(self.requirement_set)
-        probFig = make_subplots(rows=N_axes-1, cols=N_axes-1)
+        self.figure = make_subplots(rows=N_axes-1, cols=N_axes-1)
         for i in range(1, N_axes):
             for ii in range(i, N_axes):
                 ReqA = self.requirement_set[ii].values
                 ReqB = self.requirement_set[i-1].values
-                probFig.add_trace(
+                self.figure.add_trace(
                     continuous_continuous_space(ReqA, ReqB,
                                                 color=color,
                                                 name='Problem Space',
@@ -58,19 +59,24 @@ class ConstraintSpace:
                 )
 
                 if i == ii:
-                    probFig.update_yaxes(
+                    self.figure.update_yaxes(
                         title_text=self.requirement_set[i-1].symbol,
                         row=i, col=ii, )
-                    probFig.update_xaxes(
+                    self.figure.update_xaxes(
                         title_text=self.requirement_set[ii].symbol,
                         row=i, col=ii)
 
-        probFig.update_layout(title="Constraint Space -- Pairwise Axes",
-                              showlegend=True,
-                              legend=dict(
-                                  yanchor="bottom",
-                                  y=1.0,
-                                  xanchor="right",
-                                  x=1.0
-                                ))
-        probFig.show()
+        self.figure.update_layout(title="Constraint Space -- Pairwise Axes",
+                                  showlegend=True,
+                                  legend=dict(
+                                      yanchor="bottom",
+                                      y=1.0,
+                                      xanchor="right",
+                                      x=1.0
+                                  ))
+
+    def show_problem_space(self):
+        if self.figure is None:
+            self.build_problem_space()
+
+        self.figure.show()

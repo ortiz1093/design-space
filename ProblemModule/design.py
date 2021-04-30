@@ -5,6 +5,7 @@ from requirements import RequirementSet
 from constraint_space import ConstraintSpace
 import matplotlib.pyplot as plt
 import json
+import dill
 
 
 class Design:
@@ -62,6 +63,9 @@ class Design:
         self.solution_flags = self.requirement_set \
             .check_compliance(self.constraint_points)
 
+    def build_constraint_space(self):
+        self.constraint_space.build_problem_space()
+
     def build_form_space(self, N=10):
         self.check_points(N=N)
         self.form_space.input_data(self.form_points, self.solution_flags)
@@ -69,9 +73,13 @@ class Design:
     def plot_problem(self):
         self.constraint_space.show_problem_space()
 
-    def plot_solutions(self, show_fails=True):
+    def plot_solutions(self, show_fails=False):
         self.form_space.show_solution_space(show_fails=show_fails)
         # self.form_space.pair_grid()
+
+    def save(self, save_path):
+        with open(save_path, "wb") as f:
+            dill.dump(self, f)
 
 
 if __name__ == "__main__":
@@ -83,19 +91,25 @@ if __name__ == "__main__":
 
         reqs_file = '3DP_reqs.json'
         vars_file = '3DP_design_vars__new_motors.json'
-        # vars_file = '3DP_design_vars__no_coupled.json'
-        # vars_file = '3DP_design_vars.json'
         func_file = "3DP_funcs.json"
 
         print("#"*45)
+        print("Initializing Design Object...")
         test_design = Design()
+
+        print("Constructing Design Object from files...")
+        print("\tRequirements...")
         test_design.load_requirements_from_json(reqs_file)
+        print("\tDesign Variables...")
         test_design.append_variables_from_json(vars_file)
+        print("\tMap...")
         test_design.set_map_from_json(func_file)
+        print("Building Constraint Space...")
+        test_design.build_constraint_space()
+        print("Building Form Space...")
         test_design.build_form_space(N=num_pts)
-        test_design.plot_problem()
-        # test_design.plot_solutions()
-        test_design.plot_solutions(show_fails=True)
+        test_design.plot_solutions(show_fails=False)
+
         print("#"*45)
 
         t = time() - t0
