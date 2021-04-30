@@ -1,0 +1,66 @@
+{
+    "s":    {
+        "descr":    "Side length of cube frame",
+        "type":     "continuous",
+        "values":   [21.0, 27.0]
+        },
+
+    "q":    {
+        "descr":    "Width of stiffening plate",
+        "type":     "continuous",
+        "values":   [2.0, 10.0]
+        },
+
+    "t":    {
+        "descr":    "Material thickness of stiffening plate",
+        "type":     "continuous",
+        "values":   [0.1, 0.2]
+        },
+
+    "Y":    {
+        "descr":    "Young's modulus of stiffening plate material",
+        "type":     "continuous",
+        "values":   [9e6, 12e6]
+        },
+
+    "G":    {
+        "descr":    "Unsupported length of printer gantry",
+        "type":     "continuous",
+        "values":   [10.0, 18.00]
+        },
+
+    "mu":    {
+        "descr":    "Smallest microstepping capability of motor drivers/board",
+        "type":     "explicit",
+        "values":   [0.0625, 0.125, 0.25]
+        },
+
+    "p":    {
+        "descr":    "Pitch of belt pulleys in coreXY system",
+        "type":     "continuous",
+        "values":   [1.0, 3.0]
+        },
+
+    "n":    {
+        "descr":    "Number teeth on pulleys in coreXY system",
+        "type":     "discrete",
+        "values":   [15, 50, 1]
+        },
+
+    "Motor":    {
+        "descr":    "Stepper motor selection",
+        "type":     "coupled",
+        "values":   {
+            "1": {"L": 4.5e-3, "V": 3.5, "Amp": 1.0, "phi": 1.8},
+            "2": {"L": 3.2e-3, "V": 4.0, "Amp": 1.5, "phi": 1.8},
+            "3": {"L": 6.6e-3, "V": 12.0, "Amp": 3.6, "phi": 1.8},
+            "4": {"L": 2.6e-3, "V": 6.0, "Amp": 1.0, "phi": 1.8},
+            "5": {"L": 4.4e-3, "V": 24.0, "Amp": 0.3, "phi": 1.8},
+            "6": {"L": 5.4e-3, "V": 6.0, "Amp": 1.3, "phi": 1.8},
+            "7": {"L": 8.2e-3, "V": 12.0, "Amp": 0.7, "phi": 1.8},
+            "8": {"L": 2.9e-3, "V": 3.4, "Amp": 2.8, "phi": 1.8},
+            "9": {"L": 9.0e-3, "V": 12.0, "Amp": 0.8, "phi": 1.8},
+            "10": {"L": 3.8e-3, "V": 3.06, "Amp": 10.7, "phi": 1.8}
+                    }
+        }
+}

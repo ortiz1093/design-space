@@ -1,6 +1,6 @@
 import numpy as np
-import plotly.graph_objects as go
 from pprint import pprint
+import json
 
 
 def _generate_conitnuous_variable_points(rg, num_pts=1):
@@ -35,7 +35,7 @@ def _generate_coupled_variable_points(coupled_variable_values, num_pts=1):
     return [(sym, np.array(vals)) for sym, vals in D.items()]
 
 
-def _form_space_point_generator(design_var_dict, N=1):
+def form_space_point_generator(design_var_dict, N=1):
     actions = {
         'continuous': _generate_conitnuous_variable_points,
         'discrete': _generate_discrete_variable_points,
@@ -55,43 +55,11 @@ def _form_space_point_generator(design_var_dict, N=1):
 
 
 if __name__ == "__main__":
-    # x = {
-    #     "A": {"L": 0.0015, "V": 1.3, "I": 0.2, "phi": 1.8},
-    #     "B": {"L": 0.0032, "V": 5.0, "I": 1.0, "phi": 1.8},
-    #     "C": {"L": 0.0020, "V": 1.6, "I": 0.4, "phi": 0.9}
-    # }
 
-    x = {
-        "p": {
-            "descr": "var to test continuous type",
-            "type": "continuous",
-            "values": [0.3, 0.9]
-        },
+    with open("design_vars.json", "r") as f:
+        D = json.load(f)
 
-        "x": {
-            "descr": "var to test discrete type",
-            "type": "discrete",
-            "values": [10, 30, 1]
-        },
-
-        "y": {
-            "descr": "var to test explicit type",
-            "type": "explicit",
-            "values": [1, 3, 15, 59, 101]
-        },
-
-        "z": {
-            "descr": "var to test coupled type",
-            "type": "coupled",
-            "values": {
-                "A": {"L": 0.0015, "V": 1.3, "I": 0.2, "phi": 1.8},
-                "B": {"L": 0.0032, "V": 5.0, "I": 1.0, "phi": 1.8},
-                "C": {"L": 0.0020, "V": 1.6, "I": 0.4, "phi": 0.9}
-            }
-        }
-    }
-
-    point_dict = _form_space_point_generator(x, N=5)
+    point_dict = form_space_point_generator(D, N=5)
 
     pprint(point_dict)
 

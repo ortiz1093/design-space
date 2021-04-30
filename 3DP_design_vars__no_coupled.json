@@ -1,0 +1,73 @@
+{
+    "s":    {
+        "descr":    "Side length of cube frame",
+        "type":     "continuous",
+        "values":   [21.0, 27.0]
+        },
+
+    "q":    {
+        "descr":    "Width of stiffening plate",
+        "type":     "continuous",
+        "values":   [2.0, 10.0]
+        },
+
+    "t":    {
+        "descr":    "Material thickness of stiffening plate",
+        "type":     "continuous",
+        "values":   [0.1, 0.2]
+        },
+
+    "Y":    {
+        "descr":    "Young's modulus of stiffening plate material",
+        "type":     "continuous",
+        "values":   [9e6, 12e6]
+        },
+
+    "G":    {
+        "descr":    "Unsupported length of printer gantry",
+        "type":     "continuous",
+        "values":   [10.0, 18.00]
+        },
+
+    "mu":    {
+        "descr":    "Smallest microstepping capability of motor drivers/board",
+        "type":     "explicit",
+        "values":   [0.0625, 0.125, 0.25]
+        },
+
+    "p":    {
+        "descr":    "Pitch of belt pulleys in coreXY system",
+        "type":     "continuous",
+        "values":   [1.0, 3.0]
+        },
+
+    "n":    {
+        "descr":    "Number teeth on pulleys in coreXY system",
+        "type":     "discrete",
+        "values":   [15, 50, 1]
+        },
+    
+    "L":    {
+        "descr":    "Number teeth on pulleys in coreXY system",
+        "type":     "continuous",
+        "values":   [0.002, 0.005]
+        },
+
+    "V":    {
+        "descr":    "Number teeth on pulleys in coreXY system",
+        "type":     "continuous",
+        "values":   [2.5, 12.0]
+        },
+
+    "Amp":    {
+        "descr":    "Number teeth on pulleys in coreXY system",
+        "type":     "continuous",
+        "values":   [1.0, 2.0]
+        },
+    
+    "phi":    {
+        "descr":    "Number teeth on pulleys in coreXY system",
+        "type":     "continuous",
+        "values":   [1.5, 2.0]
+        }
+}

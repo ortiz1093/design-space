@@ -1,0 +1,21 @@
+{
+    "a1": {
+        "text": "This is requirement 1",
+        "allowable range": [0.1, 0.8]
+    },
+
+    "a2": {
+        "text": "This is requirement 2",
+        "allowable range": [1.0, 2.0]
+    },
+
+    "a3": {
+        "text": "This is requirement 3",
+        "allowable range": [1, 4]
+    },
+
+    "a4": {
+        "text": "This is requirement 4",
+        "allowable range": [0, 75]
+    }
+}
