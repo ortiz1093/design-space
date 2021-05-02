@@ -1,10 +1,15 @@
 from sympy import sympify, lambdify
 import numpy as np
 import json
-from pprint import pprint
 
 
 class MapFunction:
+    # TODO: Implement model-based mapping functionality
+    # TODO: Incorporate quantities and constants for use in mapping. These are
+    #       not design variables or constraint parameters, just values used to
+    #       calculate them. i.e. gravity, intermediate dependent variables, etc
+    # TODO: Method for modifying exisiting functions
+    # TODO: Method for removing map functions from set
     def __init__(self, symbol, str_expression):
         self.symbol = symbol
         self.expression = sympify(str_expression)
@@ -13,8 +18,6 @@ class MapFunction:
     def eval(self, points):
         # TODO: Implement lookups between map_functions
         f = lambdify(self.inputs, self.expression, 'numpy')
-        # pprint(points)
-        # print(self.expression, "\n")
         return f(**points)
 
 

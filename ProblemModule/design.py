@@ -106,8 +106,10 @@ if __name__ == "__main__":
         test_design.set_map_from_json(func_file)
         print("Building Constraint Space...")
         test_design.build_constraint_space()
+        test_design.plot_problem()
         print("Building Form Space...")
         test_design.build_form_space(N=num_pts)
+        # test_design.plot_solutions(show_fails=True)
         test_design.plot_solutions(show_fails=False)
 
         print("#"*45)

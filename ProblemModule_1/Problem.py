@@ -36,9 +36,6 @@ class DesignVariable:
 
 
 class Problem:
-    # TODO: Add design variables of different types
-    # TODO: Create solution space
-    # TODO: Migrate "eval_points" func from batch_funcs
     def __init__(self):
         self.A = []
         self.B = []
@@ -150,7 +147,6 @@ class Problem:
         self.B = list(set(chain.from_iterable(syms)))
 
     def _eval_points(self):
-        # TODO: Modify to work in Problem class
         results = np.array([]).reshape(0, points['n'])
         for expr in exprs:
             syms = tuple(_expected_vars(expr))
@@ -167,18 +163,13 @@ class Problem:
         pass
 
     def _check_map(self):
-        # TODO: Check design variables against map
-        # TODO: How to distinguish function inputs from design vars in code
-        # (i.e. "motor" from "voltage" or "inductance")
         pass
 
     def _calculate_sample_space(self):
-        # TODO: Determine the sample space from design variables
         pass
 
     def _generate_solution_space(self, pairwise=True, color='ForestGreen',
                                  show_fails=False):
-        # TODO: Determine the solution space from the sample space and reqs
         pass
 
 

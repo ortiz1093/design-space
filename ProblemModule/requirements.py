@@ -3,6 +3,7 @@ import json
 
 
 class Requirement:
+    # TODO: Add capability for non-contiguous and/or non-interval values
     def __init__(self, symbol, allowable_vals, text):
         self.symbol = symbol
         self.values = allowable_vals
@@ -16,12 +17,14 @@ class Requirement:
 
     def check_compliance(self, test_val):
         # TODO: Implement model-based requirement compliance checking
-        # print(np.min(self.values), " <= ", test_val, " <= ", np.max(self.values), "\n")
         return np.logical_and(np.min(self.values) <= test_val,
                               test_val <= np.max(self.values))
 
 
 class RequirementSet:
+    # TODO: Method for modifying allowable values
+    # TODO: Method for modifying symbols
+    # TODO: Method for deleting requirements
     def __init__(self):
         self.requirements = None
 

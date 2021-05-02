@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 
 
 class FormSpace:
+    # TODO: Implement feature extraction functionality
+    # TODO: Implement dimensionality reduction functionality
+    # TODO: Implement correlation plots in plot matrix upper corner
+    # TODO: Implement ability to choose which variables to plot
+    # TODO: Implement 3D plotting capability
+    # TODO: Method for target encoding of categorical variables
     def __init__(self):
         self.symbols = None
         self.solution_points = None
