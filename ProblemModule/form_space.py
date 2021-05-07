@@ -57,6 +57,4 @@ class FormSpace:
         solns = pd.Series(self.solution_points, name="Solution")
         df = pd.concat([self.points_df, solns], axis=1)
 
-        for cat in self.categorical_axes.columns:
-            series = df[cat]
-            pass
+        pass

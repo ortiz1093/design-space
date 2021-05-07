@@ -3,9 +3,22 @@ import numpy as np
 from scipy.linalg import fractional_matrix_power, diagsvd
 
 
-def continuous2category():
-    # TODO: Use clustering algo to map each continuous variable into categories
-    pass
+def categorize1D(ndarr):
+    arr_unq = np.sort(np.unique(ndarr))
+    diffs = np.diff(arr_unq)
+    three_sigma = 3 * np.std(diffs)
+    splits = np.argwhere(diffs > three_sigma)
+
+    labels = ndarr.copy()
+    label = 1
+    prev = min(arr_unq)-1
+    for split in splits:
+        labels[np.logical_and(prev < ndarr, ndarr <= arr_unq[split])] = label
+        label += 1
+        prev = arr_unq[split]
+    labels[ndarr > arr_unq[split]] = label
+
+    return labels
 
 
 def multiple_correspondence_analysis(dataframe):
