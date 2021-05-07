@@ -118,6 +118,25 @@ if __name__ == "__main__":
         print(f"\nDisplaying {num_pts} points")
         print(f"Elapsed time: {round(t, 2)}s")
 
-    test()
-    plt.show()
+    def test_embedding():
+        num_pts = 1_000
+
+        # Specify filenames
+        reqs_file = '3DP_reqs.json'
+        vars_file = '3DP_design_vars__new_motors.json'
+        func_file = "3DP_funcs.json"
+
+        # Create design from files
+        test_design = Design()
+        test_design.load_requirements_from_json(reqs_file)
+        test_design.append_variables_from_json(vars_file)
+        test_design.set_map_from_json(func_file)
+
+        # Generate form space
+        test_design.build_form_space(N=num_pts)
+        test_design.form_space.target_embedding()
+
+    test_embedding()
+    # test()
+    # plt.show()
     pass

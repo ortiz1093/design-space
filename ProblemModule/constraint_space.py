@@ -139,7 +139,7 @@ class ConstraintSpace:
             name='Problem Space',
             legendgroup="group"
         )
-        self.figure.update_xaxes(range=[])
+        # self.figure.update_xaxes(range=[])
         self.figure.update_layout(title="Constraint Space -- Pairwise Axes",
                                   showlegend=True,
                                   legend=dict(
