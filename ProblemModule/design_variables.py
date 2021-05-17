@@ -3,9 +3,9 @@ from pprint import pprint
 
 
 class DesignVariable:
-    # TODO: Method for modifying symbol
-    # TODO: Method for modifying search space
-    # TOOD: Method for modifying subvariables
+    # TODO: Method for modifying symbol (extremely low priority)
+    # TODO: Method for modifying search space (extremely low priority)
+    # TODO: Method for modifying subvariables (extremely low priority)
     def __init__(self, symbol, sample_space, space_type):
         self.symbol = symbol
         self.sample_space = sample_space

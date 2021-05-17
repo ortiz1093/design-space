@@ -73,8 +73,8 @@ class Design:
     def plot_problem(self):
         self.constraint_space.show_problem_space()
 
-    def plot_solutions(self, show_fails=False):
-        self.form_space.show_solution_space(show_fails=show_fails)
+    def plot_solutions(self, **kwargs):
+        self.form_space.show_solution_space(**kwargs)
         # self.form_space.pair_grid()
 
     def save(self, save_path):
@@ -85,7 +85,7 @@ class Design:
 if __name__ == "__main__":
     from time import time
 
-    def test():
+    def normal():
         num_pts = 1_000
         t0 = time()
 
@@ -118,13 +118,13 @@ if __name__ == "__main__":
         print(f"\nDisplaying {num_pts} points")
         print(f"Elapsed time: {round(t, 2)}s")
 
-    def test_embedding():
+    def reduction():
         num_pts = 1_000
 
         # Specify filenames
-        reqs_file = '3DP_reqs.json'
-        vars_file = '3DP_design_vars__new_motors.json'
-        func_file = "3DP_funcs.json"
+        reqs_file = '/mnt/c/Users/jbortiz/GoogleRoot/School/Clemson/Thesis/Submissions/Journal_May2021/code/3DP_reqs.json'
+        vars_file = '/mnt/c/Users/jbortiz/GoogleRoot/School/Clemson/Thesis/Submissions/Journal_May2021/code/3DP_design_vars__new_motors.json'
+        func_file = "/mnt/c/Users/jbortiz/GoogleRoot/School/Clemson/Thesis/Submissions/Journal_May2021/code/3DP_funcs.json"
 
         # Create design from files
         test_design = Design()
@@ -134,9 +134,10 @@ if __name__ == "__main__":
 
         # Generate form space
         test_design.build_form_space(N=num_pts)
-        test_design.form_space.target_embedding()
+        test_design.plot_solutions(full_space=False, show_fails=False)
 
-    test_embedding()
-    # test()
-    # plt.show()
+
+    reduction()
+    # normal()
+    plt.show()
     pass

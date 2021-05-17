@@ -62,8 +62,8 @@ def dep_continuous_continuous_space(rangeA, rangeB, color='plum', name=None,
 
 
 class ConstraintSpace:
-    # TODO: Method for individual pair plots
-    # TODO: Method for plotting 3 requirements
+    # TODO: Method for individual pair plots (low priority)
+    # TODO: Method for plotting 3 requirements (low priority)
     def __init__(self):
         self.requirement_set = None
         self.figure = None
@@ -107,7 +107,7 @@ class ConstraintSpace:
                                   ))
 
     def build_problem_space(self, color='plum'):
-        # TODO: Migrate constraint space plot to seaborn
+        # TODO: Migrate constraint space plot to seaborn (low priority)
         N_axes = len(self.requirement_set)
         self.figure = make_subplots(rows=N_axes-1, cols=N_axes-1)
         for i in range(1, N_axes):
