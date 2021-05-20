@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
         # Generate form space
         test_design.build_form_space(N=num_pts)
-        test_design.plot_solutions(full_space=False, show_fails=False)
+        test_design.plot_solutions(full_space=True, show_fails=False)
 
 
     reduction()

@@ -29,6 +29,8 @@ def multiple_correspondence_analysis(dataframe):
     """
 
     # Convert the dataframe to its Indicator Matrix (I)
+    dataframe = dataframe.astype('int')
+    dataframe = dataframe - dataframe.min(0)
     X = pd.get_dummies(data=dataframe, columns=dataframe.columns).to_numpy()
 
     # Compute the probability matrix (Z)
@@ -44,10 +46,13 @@ def multiple_correspondence_analysis(dataframe):
     D_r = np.diag(r)
 
     # Compute the MCA matrix
-    # TODO: Determine why D_c^-0.5 throws nans (Extremely high-priority)
-    M = fractional_matrix_power(D_r, -0.5) \
+    # M = fractional_matrix_power(D_r, -0.5) \
+    #     @ (Z - np.outer(r, c)) \
+    #     @ fractional_matrix_power(D_c, -0.5)
+
+    M = np.sqrt(np.diag(r**-1)) \
         @ (Z - np.outer(r, c)) \
-        @ fractional_matrix_power(D_c, -0.5)
+        @ np.sqrt(np.diag(c**-1))
 
     # Compute the SVD of the MCA matrix
     _, S, Qt = np.linalg.svd(M, full_matrices=False)
@@ -57,7 +62,8 @@ def multiple_correspondence_analysis(dataframe):
     S = np.flip(np.sort(S))
 
     # Compute the column factor scores of the MCA matrix
-    G = fractional_matrix_power(D_c, -0.5) @ Q @ diagsvd(S, *X.shape)
+    # G = fractional_matrix_power(D_c, -0.5) @ Q @ diagsvd(S, *X.shape)
+    G = np.sqrt(np.diag(c**-1)) @ Q @ diagsvd(S, *X.shape)
 
     return X, G, S
 

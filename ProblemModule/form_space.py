@@ -44,13 +44,13 @@ class FormSpace:
             df = self.reduced_df.astype(float)
 
         if df.shape[1] > max_dim:
-            df = df[:, :max_dim]
+            df = df.iloc[:, :max_dim]
 
         hue = None
         if show_fails:
             hue = 'solution'
             df[hue] = self.solution_points
-        else:
+        elif full_space:
             df = df[self.solution_points]
 
         self.plot = sns.pairplot(df, hue=hue, diag_kind='kde',
