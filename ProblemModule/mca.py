@@ -68,7 +68,7 @@ def multiple_correspondence_analysis(dataframe):
     return X, G, S
 
 
-def factor_space_projection(dataframe, n_dim='auto', scale=1):
+def factor_space_projection(dataframe, n_dim='cutoff', scale=1, threshold=0.35):
     X, G, S = multiple_correspondence_analysis(dataframe)
 
     _, K = dataframe.shape
@@ -91,9 +91,11 @@ def factor_space_projection(dataframe, n_dim='auto', scale=1):
     # Determine the number of dimension (if not provided
     if n_dim == 'auto':
         n_dim = len(cTau)
+    elif n_dim == 'cutoff':
+        n_dim = np.argmin(abs(np.cumsum(cTau)-threshold))
 
     # Return
-    return X @ G[:, :n_dim] / S[:n_dim] / scale, cTau.round(3)
+    return X @ G[:, :n_dim] / S[:n_dim] / scale, cTau[:n_dim].round(3)
 
 
 if __name__ == '__main__':

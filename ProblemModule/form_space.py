@@ -20,6 +20,10 @@ class FormSpace:
         self.reduced_df = None
         self.categorical_axes = None
         self.numerical_axes = None
+        self.gradient = None
+
+    def set_value_gradient(self, gradient_values):
+        self.gradient = gradient_values
 
     def input_data(self, points_dict, solution_flags):
         self.points_df = pd.DataFrame(points_dict)
@@ -36,7 +40,7 @@ class FormSpace:
             codes = self.categorical_axes[col].cat.codes
             self.points_df[col] = codes
 
-    def build_solution_space(self, max_dim=10, full_space=True, show_fails=False):
+    def build_solution_space(self, max_dim=10, full_space=True, show_fails=False, show_gradient=False):
         if full_space:
             df = self.points_df.astype(float)
         else:
@@ -50,13 +54,20 @@ class FormSpace:
         if show_fails:
             hue = 'solution'
             df[hue] = self.solution_points
-        elif full_space:
+        elif show_gradient:
+            hue = 'gradient'
+            # hue = self.gradient[self.solution_points]
+            df[hue] = self.gradient
+
+        if full_space and not show_fails:
             df = df[self.solution_points]
 
-        self.plot = sns.pairplot(df, hue=hue, diag_kind='kde',
+        diag_kind = 'auto' if show_gradient else 'kde'
+
+        self.plot = sns.pairplot(df, hue=hue, diag_kind=diag_kind,
                                  corner=True, aspect=1, height=1)
 
-        if not show_fails:
+        if not (show_fails or show_gradient):
             self.plot.map_lower(sns.kdeplot, levels=4, color=".2")
 
     def show_solution_space(self, **kwargs):

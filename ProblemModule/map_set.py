@@ -9,11 +9,13 @@ class MapFunction:
     #       not design variables or constraint parameters, just values used to
     #       calculate them. i.e. gravity, intermediate dependent variables, etc
     #       (hi priority)
-    # TODO: Method for modifying exisiting functions (low priority)
+    # TODO: Method for modifying existing functions (low priority)
     # TODO: Method for removing map functions from set (low priority)
-    def __init__(self, symbol, str_expression):
+    def __init__(self, symbol, str_expression=None, model=None):
+        assert not (str_expression and model)
         self.symbol = symbol
-        self.expression = sympify(str_expression)
+        self.expression = sympify(str_expression) if str_expression else None
+        self.model = model
         self.inputs = list(self.expression.free_symbols)
 
     def eval(self, points):
