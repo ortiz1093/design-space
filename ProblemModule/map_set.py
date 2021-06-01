@@ -5,22 +5,32 @@ import json
 
 class MapFunction:
     # TODO: Implement model-based mapping functionality (Hi priority)
-    # TODO: Incorporate quantities and constants for use in mapping. These are
+    # TODO: Incorporate quantities and constants for use in mapping (hi priority). These are
     #       not design variables or constraint parameters, just values used to
     #       calculate them. i.e. gravity, intermediate dependent variables, etc
-    #       (hi priority)
     # TODO: Method for modifying existing functions (low priority)
     # TODO: Method for removing map functions from set (low priority)
-    def __init__(self, symbol, str_expression=None, model=None):
-        assert not (str_expression and model)
+    def __init__(self, symbol, str_expression=None, model=None, model_inputs=None):
+        assert not (str_expression and model), "Map function may have either a model or an expression, not both"
+        if model:
+            assert model_inputs is not None, "No inputs were provided for the model-based map"
         self.symbol = symbol
         self.expression = sympify(str_expression) if str_expression else None
         self.model = model
         self.inputs = list(self.expression.free_symbols)
 
+    def args_dict_2_numpy(self, args_dict):
+        # assert args_dict.keys() ==
+        pass
+
     def eval(self, points):
         # TODO: Implement lookups between map_functions (hi priorities)
-        f = lambdify(self.inputs, self.expression, 'numpy')
+        if self.expression:
+            f = lambdify(self.inputs, self.expression, 'numpy')
+        else:
+            # TODO: Implement eval for model-based mapping (Hi priority)
+            pass
+
         return f(**points)
 
 

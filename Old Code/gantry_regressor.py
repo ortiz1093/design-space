@@ -1,14 +1,12 @@
-from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import LinearSVC, SVC
-from sklearn.ensemble import RandomForestClassifier
 import numpy as np
-# import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.model_selection import train_test_split
 import dill
 from numpy.random import default_rng
+RANDOM_STATE = 42
 
-rng = default_rng(42)
+rng = default_rng(RANDOM_STATE)
 
 results_file = "/mnt/c/Users/jbortiz/GoogleRoot/School/Clemson/Thesis/Submissions/Journal_May2021/code/Ansys Data/" \
     "ANSYS_Results_2021Mar11.csv"
@@ -17,32 +15,51 @@ X = np.loadtxt(results_file, skiprows=1, delimiter=',')
 
 # Classifying based on deformation, mass ignored
 n, d = X[:, :-2].shape
-y = X[:, -2] < 0.001
+y = X[:, -2]
 
-split = 0.8
-X_train, X_test = X[:int(split*n), :-2], X[int(split*n):, :-2]
-y_train, y_test = y[:int(split*n)], y[int(split*n):]
+# split = 0.8
+# X_train, X_test = X[:int(split*n), :-2], X[int(split*n):, :-2]
+# y_train, y_test = y[:int(split*n)], y[int(split*n):]
+X_train, X_test, y_train, y_test = train_test_split(X[:, :-2], y, test_size=0.33, random_state=42)
+Xscaler = MinMaxScaler()
+Yscaler = MinMaxScaler()
+X_train = Xscaler.fit_transform(X_train)
+y_train = Yscaler.fit_transform(y_train.reshape(-1, 1)).flatten()
+X_test = Xscaler.transform(X_test)
+y_test = Yscaler.transform(y_test.reshape(-1, 1)).flatten()
+
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVR
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.neural_network import MLPRegressor
+from sklearn.linear_model import SGDRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.gaussian_process.kernels import RBF
 
 show = True
 # TODO: Side-by-side comparisons of results from different classifiers
-classifiers = [
-    SVC,
-    LinearSVC,
-    GaussianNB,
-    RandomForestClassifier,
-    LogisticRegression
+regressors = [
+    SVR(C=1.0, epsilon=0.2),
+    KNeighborsRegressor(n_neighbors=5, weights='distance'),
+    GaussianProcessRegressor(kernel=RBF(), random_state=RANDOM_STATE),
+    MLPRegressor(random_state=RANDOM_STATE, max_iter=1000),
+    SGDRegressor(max_iter=1000, tol=1e-3)
 ]
 
-for classifier in classifiers:
-    clf_name = classifier.__doc__[:classifier.__doc__.find(".")]
-    clf = classifier()
-    clf.fit(X_train, y_train)
+for regressor in regressors:
+    regr_name = regressor.__doc__[:regressor.__doc__.find(".")]
+    regressor.fit(X_train, y_train)
 
-    y_hat = clf.predict(X_test)
-    errs = sum(np.logical_xor(y_test, y_hat))
-    print(clf_name)
+    y_hat = regressor.predict(X_test)
+    # y_hat = Yscaler.inverse_transform(y_hat.reshape(-1, 1)).flatten()
+    MSE = mean_squared_error(y_test, y_hat)
+    MAE = mean_absolute_error(y_test, y_hat)
+    R2 = r2_score(y_test, y_hat)
+    print(regr_name)
     print("\t# Samples:", len(y_test))
-    print("\t# Errors:", errs)
+    print("\tMSE:", MSE)
+    print("\tMSE:", MAE)
+    print("\tR^2:", R2)
 
 Wall = np.array([0.050, 0.125])
 Width = np.array([0.36, 1.5])
@@ -66,11 +83,20 @@ X_new = np.vstack((
 )).T
 
 # classifier_file = "/mnt/c/Users/jbortiz/GoogleRoot/School/Clemson/Thesis/Submissions/Journal_May2021/code/Old Code/" \
-#     "gantry_clf.pkl"
+#     "gantry_regr.pkl"
 # with open(classifier_file, "wb") as f:
-#     dill.dump(clf, f)
+#     dill.dump(regr, f)
 
-y_new = clf.predict(X_new)
+# regr = GaussianProcessRegressor(kernel=RBF(), random_state=RANDOM_STATE)
+# regr = KNeighborsRegressor(n_neighbors=5, weights='distance')
+# regr = MLPRegressor(random_state=RANDOM_STATE, max_iter=1000)
+# regr = SGDRegressor(max_iter=1000, tol=1e-3)
+regr = SVR(C=1.0, epsilon=0.2)
+regr.fit(X_train, y_train)
+y_hat = regr.predict(X_new)
+y_hat = Yscaler.inverse_transform(y_hat.reshape(-1, 1)).flatten()
+y_new = y_hat < 0.001
+y = y < 0.001
 
 if show:
     fig = make_subplots(rows=d-1, cols=d-1)

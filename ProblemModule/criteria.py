@@ -36,7 +36,7 @@ class CriteriaSet:
             self.criteria = []
 
         for symbol, weights, text in zip(symbols, weights, text):
-            # TODO: Process params before appending
+            # TODO: Process params before appending (what does this mean?)
             self.criteria.append(Criterion(symbol, weights, text))
 
     def append_criteria_from_json(self, filepath):

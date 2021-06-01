@@ -5,12 +5,12 @@ from mca import categorize1D, factor_space_projection
 
 
 class FormSpace:
-    # TODO: Implement feature extraction functionality (med priority)
-    # TODO: Implement dimensionality reduction functionality (hi priority)
+    # TODO: Implement feature extraction functionality (low priority)
+    # TODO: Implement dimensionality reduction functionality (med priority)
     # TODO: Implement corr vals in plot matrix upper corner (low priority)
     # TODO: Implement ability to choose which variables to plot (low priority)
     # TODO: Implement 3D plotting capability (extremely low priority)
-    # TODO: Implement MCA (Hi priority)
+    # TODO: Implement MCA (or other mixed data dim-reduction) (med priority)
     def __init__(self):
         self.symbols = None
         self.solution_points = None
