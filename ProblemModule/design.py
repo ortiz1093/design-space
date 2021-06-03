@@ -6,10 +6,14 @@ from constraint_space import ConstraintSpace
 from gauge_space import GaugeSpace
 from criteria_map_set import CriteriaMap
 from value import ValueFunction
+from utils import solution_space_similarity as ss_similarity
 from warnings import warn
 import matplotlib.pyplot as plt
 import json
 import dill
+from numpy.random import default_rng
+
+rng = default_rng(1230)
 
 
 class Design:
@@ -60,11 +64,19 @@ class Design:
     def load_requirements_from_json(self, filepath):
         self.requirement_set.append_requirements_from_json(filepath)
         self.constraint_space.set_requirements(self.requirement_set)
-
-    def get_points(self, num_samples):
+    
+    def generate_samples(self, num_samples):
         samples = []
         for var in self.design_variables:
             samples.extend(var.generate_samples(num_samples))
+
+        return samples
+
+    def get_points(self, num_samples):
+        # samples = []
+        # for var in self.design_variables:
+        #     samples.extend(var.generate_samples(num_samples))
+        samples = self.generate_samples(num_samples)
 
         self.map_inputs = dict([(item[0], item[1])
                                 for item in samples if item[2]])
@@ -148,6 +160,47 @@ class Design:
     
     def plot_criteria(self):
         self.gauge_space.show_gauge_space()
+
+    def solution_space_similarity(self, designB, num_samples=10_000):
+        # Generate common set of points to map
+        samples = self.generate_samples(num_samples)
+        inputs = dict([(item[0], item[1])
+                       for item in samples if item[2]])
+
+        # Map point sets for both designs and get solution masks
+        pointsA = self.map.map_points(inputs)
+        soln_mask_A = self.requirement_set.check_compliance(pointsA)
+
+        pointsB = designB.map.map_points(inputs)
+        soln_mask_B = designB.requirement_set.check_compliance(pointsB)
+
+        # Run similarity measure on masks
+        return ss_similarity(soln_mask_A, soln_mask_B)
+    
+    def problem_space_similarity(self, designB, num_samples=10_000):
+        A_ranges = np.nan_to_num([req.values for req in self.requirement_set]).T
+        B_ranges = np.nan_to_num([req.values for req in designB.requirement_set]).T
+
+        mins = np.minimum(A_ranges[0, :], B_ranges[0, :])
+        maxs = np.maximum(A_ranges[1, :], B_ranges[1, :])
+
+        A_normal = ((A_ranges - mins) / (maxs - mins))
+        B_normal = ((B_ranges - mins) / (maxs - mins))
+
+        n_dim = len(self.requirement_set)
+
+        samples = rng.random([n_dim, num_samples]).T
+
+        prblm_mask_A = np.all(np.logical_and(samples >= A_normal.min(axis=0), samples <= A_normal.max(axis=0)), axis=1)
+        prblm_mask_B = np.all(np.logical_and(samples >= B_normal.min(axis=0), samples <= B_normal.max(axis=0)), axis=1)
+
+        return ss_similarity(prblm_mask_A, prblm_mask_B)
+    
+    def sensitivity(self, designB, num_samples=10_000):
+        dS = 1 - self.solution_space_similarity(designB, num_samples=num_samples)
+        dP = 1 - self.problem_space_similarity(designB, num_samples=num_samples)
+
+        return dS / dP
 
 
 if __name__ == "__main__":
@@ -329,10 +382,46 @@ if __name__ == "__main__":
         pass
 
 
+    def similarity_test():
+
+        # Specify filenames
+        reqs_fileA = '/root/ThesisCode/3DP_reqs.json'
+        reqs_fileB = '/root/ThesisCode/3DP_reqsB.json'
+        vars_file = '/root/ThesisCode/3DP_design_vars__new_motors.json'
+        func_file = "/root/ThesisCode/3DP_funcs.json"
+
+        # Create design from files
+        designA = Design()
+        designA.load_requirements_from_json(reqs_fileA)
+        designA.append_variables_from_json(vars_file)
+        designA.set_map_from_json(func_file)
+        
+        designB = Design()
+        designB.load_requirements_from_json(reqs_fileB)
+        designB.append_variables_from_json(vars_file)
+        designB.set_map_from_json(func_file)
+
+        # Similarity
+        soln_similarity = designA.solution_space_similarity(designB)
+        prblm_similarity = designA.problem_space_similarity(designB)
+        dS = 1 - soln_similarity
+        dP = 1 - prblm_similarity
+        dSdP = designA.sensitivity(designB)
+
+        print('Soln Similarity: ', soln_similarity)
+        print('Prblm Similarity: ', prblm_similarity)
+        print('dS: ', dS)
+        print('dP: ', dP)
+        print('Sensitivity: ', dSdP)
+
+        pass
+
+
     # values()
     # reduction()
     # normal()
     # reduction_dmaps()
-    gauge_test()
+    # gauge_test()
+    similarity_test()
     # plt.show()
     pass

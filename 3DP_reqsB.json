@@ -1,12 +1,12 @@
 {
     "dx": {
         "text": "Top plane of the frame must deform more than 0.001 in the x-direction",
-        "allowable range": [-0.0005,   0.003]
+        "allowable range": [-0.001,   0.001]
     },
 
     "dy": {
         "text": "Top plane of the frame must deform more than 0.005 in the y-direction",
-        "allowable range": [-0.0025,   0.0025]
+        "allowable range": [-0.005,   0.005]
     },
 
     "Dx": {
@@ -26,6 +26,6 @@
 
     "res": {
         "text": "The print nozzle must be capable of achieving a resolution of 0.001 in or less",
-        "allowable range": [0.0, 0.003]
+        "allowable range": [0.0, 0.001]
     }
 }

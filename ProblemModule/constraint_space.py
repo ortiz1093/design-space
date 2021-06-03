@@ -1,64 +1,64 @@
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-# from requirements import RequirementSet
+from utils import continuous_continuous_space, dep_continuous_continuous_space
 
 
-def continuous_continuous_space(rangeA, rangeB, color='plum', name=None,
-                                showlegend=True):
-    """
-    Generate a plot showing a shaded continuous region of 2D space (rectangle).
-        params:
-            rangeA: upper and lower bounds of horizontal axis
-            rangeB: upper and lower bounds of vertical axis
-            color (optional): color of shaded region
-            name (optional): name of shaded region to show in legend
-            showlegend (optional): whether to represent trace in plot legend
-        return:
-            2D plotly scatter trace
-    """
-    x0, x1 = min(rangeA), min(max(rangeA), 1e300)
-    y0, y1 = min(rangeB), min(max(rangeB), 1e300)
+# def continuous_continuous_space(rangeA, rangeB, color='plum', name=None,
+#                                 showlegend=True):
+#     """
+#     Generate a plot showing a shaded continuous region of 2D space (rectangle).
+#         params:
+#             rangeA: upper and lower bounds of horizontal axis
+#             rangeB: upper and lower bounds of vertical axis
+#             color (optional): color of shaded region
+#             name (optional): name of shaded region to show in legend
+#             showlegend (optional): whether to represent trace in plot legend
+#         return:
+#             2D plotly scatter trace
+#     """
+#     x0, x1 = min(rangeA), min(max(rangeA), 1e300)
+#     y0, y1 = min(rangeB), min(max(rangeB), 1e300)
 
-    return go.Scatter(
-        x=[x0, x1, x1, x0, x0],
-        y=[y0, y0, y1, y1, y0],
-        mode='markers',
-        fill='toself',
-        fillcolor=color,
-        line=dict(color=color),
-        name=name,
-        legendgroup="group",
-        showlegend=showlegend
-    )
+#     return go.Scatter(
+#         x=[x0, x1, x1, x0, x0],
+#         y=[y0, y0, y1, y1, y0],
+#         mode='markers',
+#         fill='toself',
+#         fillcolor=color,
+#         line=dict(color=color),
+#         name=name,
+#         legendgroup="group",
+#         showlegend=showlegend
+#     )
 
 
-def dep_continuous_continuous_space(rangeA, rangeB, color='plum', name=None,
-                                    showlegend=True):
-    """
-    Generate a plot showing a shaded continuous region of 2D space (rectangle).
-        params:
-            rangeA: upper and lower bounds of horizontal axis
-            rangeB: upper and lower bounds of vertical axis
-            color (optional): color of shaded region
-            name (optional): name of shaded region to show in legend
-            showlegend (optional): whether to represent trace in plot legend
-        return:
-            2D plotly scatter trace
-    """
-    x0, x1 = min(rangeA), min(max(rangeA), 1e300)
-    y0, y1 = min(rangeB), min(max(rangeB), 1e300)
+# def dep_continuous_continuous_space(rangeA, rangeB, color='plum', name=None,
+#                                     showlegend=True):
+#     """
+#     Generate a plot showing a shaded continuous region of 2D space (rectangle).
+#         params:
+#             rangeA: upper and lower bounds of horizontal axis
+#             rangeB: upper and lower bounds of vertical axis
+#             color (optional): color of shaded region
+#             name (optional): name of shaded region to show in legend
+#             showlegend (optional): whether to represent trace in plot legend
+#         return:
+#             2D plotly scatter trace
+#     """
+#     x0, x1 = min(rangeA), min(max(rangeA), 1e300)
+#     y0, y1 = min(rangeB), min(max(rangeB), 1e300)
 
-    return go.Scatter(
-        x=[x0, x1, x1, x0, x0],
-        y=[y0, y0, y1, y1, y0],
-        mode='markers',
-        fill='toself',
-        fillcolor=color,
-        line=dict(color=color),
-        name=name,
-        legendgroup="group",
-        showlegend=showlegend
-    )
+#     return go.Scatter(
+#         x=[x0, x1, x1, x0, x0],
+#         y=[y0, y0, y1, y1, y0],
+#         mode='markers',
+#         fill='toself',
+#         fillcolor=color,
+#         line=dict(color=color),
+#         name=name,
+#         legendgroup="group",
+#         showlegend=showlegend
+#     )
 
 
 class ConstraintSpace:

@@ -49,7 +49,7 @@ class GaugeSpace:
                                  corner=True, aspect=1, height=1)
 
         if not show_gradient:
-            self.plot.map_lower(sns.kdeplot, levels=4, color=".2")
+            self.plot.map_lower(sns.kdeplot, levels=6, color=".2")
 
     def show_gauge_space(self, **kwargs):
         if self.plot is None:
