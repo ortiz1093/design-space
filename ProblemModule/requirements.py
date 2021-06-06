@@ -17,6 +17,9 @@ class Requirement:
 
     def check_compliance(self, test_val):
         # TODO: Implement model-based compliance checking (hi priority)
+        if test_val.dtype == 'bool':
+            return test_val
+
         return np.logical_and(np.min(self.values) <= test_val,
                               test_val <= np.max(self.values))
 

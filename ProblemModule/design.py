@@ -110,6 +110,7 @@ class Design:
         if (self.map_inputs is None) or overwrite:
             self.get_points(N)
         self.constraint_points = self.map.map_points(self.map_inputs)
+        self.constraint_points.update(self.map.classify_points(self.map_inputs))
         self.solution_flags = self.requirement_set \
             .check_compliance(self.constraint_points)
 
@@ -161,7 +162,7 @@ class Design:
     def plot_criteria(self):
         self.gauge_space.show_gauge_space()
 
-    def solution_space_similarity(self, designB, num_samples=10_000):
+    def solution_space_similarity(self, designB, num_samples=100_000):
         # Generate common set of points to map
         samples = self.generate_samples(num_samples)
         inputs = dict([(item[0], item[1])
@@ -177,7 +178,7 @@ class Design:
         # Run similarity measure on masks
         return ss_similarity(soln_mask_A, soln_mask_B)
     
-    def problem_space_similarity(self, designB, num_samples=10_000):
+    def problem_space_similarity(self, designB, num_samples=100_000):
         A_ranges = np.nan_to_num([req.values for req in self.requirement_set]).T
         B_ranges = np.nan_to_num([req.values for req in designB.requirement_set]).T
 
@@ -196,11 +197,22 @@ class Design:
 
         return ss_similarity(prblm_mask_A, prblm_mask_B)
     
-    def sensitivity(self, designB, num_samples=10_000):
+    def sensitivity(self, designB, num_samples=100_000):
         dS = 1 - self.solution_space_similarity(designB, num_samples=num_samples)
         dP = 1 - self.problem_space_similarity(designB, num_samples=num_samples)
 
         return dS / dP
+
+    def point_conformity(self, point_dict):
+        # TODO: Incorporate categorical distances, normalize, plot (hi priority)
+        df = pd.DataFrame(self.map_inputs)
+        soln_spc_pts = df[self.solution_flags].to_numpy()
+        axes = df.columns
+        new_point = np.array([point_dict[axis] for axis in axes])
+
+        dists = np.linalg.norm(soln_spc_pts - new_point, axis=1)
+
+        return soln_spc_pts[np.argmin(dists), :], dists.min()
 
 
 if __name__ == "__main__":
@@ -357,7 +369,7 @@ if __name__ == "__main__":
 
 
     def gauge_test():
-        num_pts = 1_000
+        num_pts = 10_000
 
         # Specify filenames
         reqs_file = '/root/ThesisCode/3DP_reqs.json'
@@ -402,11 +414,12 @@ if __name__ == "__main__":
         designB.set_map_from_json(func_file)
 
         # Similarity
-        soln_similarity = designA.solution_space_similarity(designB)
-        prblm_similarity = designA.problem_space_similarity(designB)
+        n_pts = 100_000
+        soln_similarity = designA.solution_space_similarity(designB, num_samples=n_pts)
+        prblm_similarity = designA.problem_space_similarity(designB, num_samples=n_pts)
         dS = 1 - soln_similarity
         dP = 1 - prblm_similarity
-        dSdP = designA.sensitivity(designB)
+        dSdP = designA.sensitivity(designB, num_samples=n_pts)
 
         print('Soln Similarity: ', soln_similarity)
         print('Prblm Similarity: ', prblm_similarity)
@@ -414,14 +427,47 @@ if __name__ == "__main__":
         print('dP: ', dP)
         print('Sensitivity: ', dSdP)
 
+        designA.build_constraint_space()
+        designA.plot_problem()
+        designA.build_form_space(N=n_pts)
+        designA.plot_solutions(show_fails=False)
+
         pass
 
+    def models():
+        num_pts = 1_000
+
+        reqs_file = '/root/ThesisCode/3DP_reqs_w_models.json'
+        vars_file = '/root/ThesisCode/3DP_design_vars_w_gantry_model.json'
+        func_file = "/root/ThesisCode/3DP_funcs_models.json"
+
+        print("#"*45)
+        print("Initializing Design Object...")
+        test_design = Design()
+        print("Constructing Design Object from files...")
+        print("\tRequirements...")
+        test_design.load_requirements_from_json(reqs_file)
+        print("\tDesign Variables...")
+        test_design.append_variables_from_json(vars_file)
+        print("\tMap...")
+        test_design.set_map_from_json(func_file)
+        print("Building Constraint Space...")
+        test_design.build_constraint_space()
+        # test_design.plot_problem()
+        print("Building Form Space...")
+        test_design.build_form_space(N=num_pts)
+        # test_design.plot_solutions(show_fails=True)
+
+        pt = dict(s=20.0, q=8.1, t=0.5, Y=8.9e6, G=18, w=0.26, h=0.8, t_f=0.08, t_w=0.2, mu=0.5, p=2.0, n=50,
+                  L=3e-3, V=3.4, Amp=1.0, phi=1.8)
+        print(test_design.point_conformity(pt))
 
     # values()
     # reduction()
     # normal()
     # reduction_dmaps()
+    # similarity_test()
     # gauge_test()
-    similarity_test()
+    models()
     # plt.show()
     pass

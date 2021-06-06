@@ -68,22 +68,22 @@ def mask_union(maskA, maskB):
 
 
 def mask_intersection(maskA, maskB):
-    setA = set(np.argwhere(maskA).flatten())
-    setB = set(np.argwhere(maskB).flatten())
+    setA = set(np.argwhere(maskA).flatten().copy())
+    setB = set(np.argwhere(maskB).flatten().copy())
     # TODO: modify to return the indices that are True in both, not the truth values themselves
     return setA.intersection(setB)
 
 
 def jaccard_index(maskA, maskB):
     numerator = len(mask_intersection(maskA, maskB))
-    denominator = len(mask_union(maskA, maskB))
+    denominator = len(mask_union(maskA, maskB)) + 1e-300
 
     return numerator / denominator
 
 
 def overlap_coefficient(maskA, maskB):
     numerator = len(mask_intersection(maskA, maskB))
-    denominator = min(len(maskA[maskA]), len(maskB[maskB]))
+    denominator = min(len(maskA[maskA]), len(maskB[maskB])) + 1e-300
 
     return numerator / denominator
 

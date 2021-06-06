@@ -69,6 +69,26 @@ class FormSpace:
 
         if not (show_fails or show_gradient):
             self.plot.map_lower(sns.kdeplot, levels=4, color=".2")
+        
+        def onclick(event):
+            axes = event.inaxes
+            axis_names = df.columns
+            x_name = axis_names[axes.colNum]
+            y_name = axis_names[axes.rowNum]
+            x = df[x_name]
+            y = df[y_name]
+            hu = df[hue]
+            plt.figure()
+            clk_ax = sns.scatterplot(x=x, y=y, hue=hu)
+            clk_ax.xaxis.xlabel = x_name
+            clk_ax.xaxis.ylabel = y_name
+            plt.show()
+            # print(event.inaxes)
+            # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+            #     ('double' if event.dblclick else 'single', event.button,
+            #     event.x, event.y, event.xdata, event.ydata))
+
+        self.plot.fig.canvas.mpl_connect('button_press_event', onclick)
 
     def show_solution_space(self, **kwargs):
         if self.plot is None:
