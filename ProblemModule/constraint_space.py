@@ -1,6 +1,6 @@
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from utils import continuous_continuous_space, dep_continuous_continuous_space
+from ProblemModule.utils import continuous_continuous_space, dep_continuous_continuous_space
 
 
 # def continuous_continuous_space(rangeA, rangeB, color='plum', name=None,

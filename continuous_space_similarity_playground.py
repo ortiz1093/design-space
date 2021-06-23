@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.random import default_rng
-from utils import jaccard_index, overlap_coefficient, solution_space_similarity
+from ProblemModule.utils import jaccard_index, overlap_coefficient, solution_space_similarity
 
 rng = default_rng(42)
 

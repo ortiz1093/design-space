@@ -1,13 +1,15 @@
-from map_set import MapSet
-from design_variables import DesignVariable
-from form_space import FormSpace
-from requirements import RequirementSet
-from constraint_space import ConstraintSpace
-from gauge_space import GaugeSpace
-from criteria_map_set import CriteriaMap
-from value import ValueFunction
-from utils import solution_space_similarity as ss_similarity
+from ProblemModule.map_set import MapSet
+from ProblemModule.design_variables import DesignVariable
+from ProblemModule.form_space import FormSpace
+from ProblemModule.requirements import RequirementSet
+from ProblemModule.constraint_space import ConstraintSpace
+from ProblemModule.gauge_space import GaugeSpace
+from ProblemModule.criteria_map_set import CriteriaMap
+from ProblemModule.value import ValueFunction
+from ProblemModule.utils import space_similarity as ss_similarity
 from warnings import warn
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import dill

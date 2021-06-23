@@ -1,7 +1,7 @@
-from map_set import MapFunction
 from sympy import sympify, lambdify
 import numpy as np
 import json
+from ProblemModule.map_set import MapFunction
 
 
 class CriteriaMap:

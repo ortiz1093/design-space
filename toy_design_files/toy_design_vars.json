@@ -1,0 +1,13 @@
+{
+    "r":    {
+        "descr":    "Radius of sphere",
+        "type":     "continuous",
+        "values":   [1.0, 2.5]
+        },
+
+    "rho":    {
+        "descr":    "Density of sphere material",
+        "type":     "continuous",
+        "values":   [1.0, 8.0]
+        }
+}

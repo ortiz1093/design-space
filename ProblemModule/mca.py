@@ -42,8 +42,8 @@ def multiple_correspondence_analysis(dataframe):
     r = Z.sum(axis=1)
 
     # Convert the sums into diagonal matrices
-    D_c = np.diag(c)
-    D_r = np.diag(r)
+    # D_c = np.diag(c)
+    # D_r = np.diag(r)
 
     # Compute the MCA matrix
     # M = fractional_matrix_power(D_r, -0.5) \

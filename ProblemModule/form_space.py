@@ -1,7 +1,7 @@
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
-from mca import categorize1D, factor_space_projection
+from ProblemModule.mca import categorize1D, factor_space_projection
 
 
 class FormSpace:
@@ -73,11 +73,13 @@ class FormSpace:
         def onclick(event):
             axes = event.inaxes
             axis_names = df.columns
-            x_name = axis_names[axes.colNum]
-            y_name = axis_names[axes.rowNum]
+            # x_name = axis_names[axes.colNum]
+            x_name = axis_names[axes.get_subplotspec().colspan.start]
+            # y_name = axis_names[axes.rowNum]
+            y_name = axis_names[axes.get_subplotspec().rowspan.start]
             x = df[x_name]
             y = df[y_name]
-            hu = df[hue]
+            hu = df[hue] if hue else None
             plt.figure()
             clk_ax = sns.scatterplot(x=x, y=y, hue=hu)
             clk_ax.xaxis.xlabel = x_name

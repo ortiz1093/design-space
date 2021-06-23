@@ -1,7 +1,7 @@
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
-from mca import categorize1D, factor_space_projection
+from ProblemModule.mca import categorize1D, factor_space_projection
 
 
 class GaugeSpace:
