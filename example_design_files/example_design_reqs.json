@@ -1,17 +1,17 @@
 {
     "dx": {
         "text": "Top plane of the frame must deform more than 0.001 in the x-direction",
-        "allowable range": [-0.002,   0.002]
+        "allowable range": [-0.001,   0.001]
     },
 
     "dG": {
         "text": "Gantry bar must deform more than 0.001 in lateral direction",
-        "allowable range": [-0.002,   0.002]
+        "allowable range": [-0.001,   0.001]
     },
 
     "dy": {
         "text": "Top plane of the frame must deform more than 0.005 in the y-direction",
-        "allowable range": [-0.003,   0.002]
+        "allowable range": [-0.005,   0.005]
     },
 
     "Dx": {
@@ -26,11 +26,11 @@
 
     "v": {
         "text": "The print nozzle must be capable of travelling 16 in/s or greater",
-        "allowable range": [18.0,   1e308]
+        "allowable range": [16.0,   1e308]
     },
 
     "res": {
         "text": "The print nozzle must be capable of achieving a resolution of 0.001 in or less",
-        "allowable range": [0.0, 0.0025]
+        "allowable range": [0.0, 0.001]
     }
 }

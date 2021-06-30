@@ -6,7 +6,7 @@ from ProblemModule.constraint_space import ConstraintSpace
 from ProblemModule.gauge_space import GaugeSpace
 from ProblemModule.criteria_map_set import CriteriaMap
 from ProblemModule.value import ValueFunction
-from ProblemModule.utils import space_similarity as ss_similarity
+from ProblemModule.utils import space_similarity
 from warnings import warn
 import numpy as np
 import pandas as pd
@@ -178,26 +178,33 @@ class Design:
         soln_mask_B = designB.requirement_set.check_compliance(pointsB)
 
         # Run similarity measure on masks
-        return ss_similarity(soln_mask_A, soln_mask_B)
+        return space_similarity(soln_mask_A, soln_mask_B)
     
     def problem_space_similarity(self, designB, num_samples=100_000):
+        # Replace nans with zeros and infs with large finite numbers
         A_ranges = np.nan_to_num([req.values for req in self.requirement_set]).T
         B_ranges = np.nan_to_num([req.values for req in designB.requirement_set]).T
 
+        # Get combined mins of lo ends and maxs of hi ends for all allowed ranges in both sets of constraint parameters
         mins = np.minimum(A_ranges[0, :], B_ranges[0, :])
         maxs = np.maximum(A_ranges[1, :], B_ranges[1, :])
 
+        # Minmax scale the ranges according to the mins/maxs from prev step
         A_normal = ((A_ranges - mins) / (maxs - mins))
         B_normal = ((B_ranges - mins) / (maxs - mins))
 
+        # Number of constraint parameters under consideration
         n_dim = len(self.requirement_set)
 
+        # Draw N random samples between 0 and 1 for each constraint parameter (i.e. random points in Constraint space)
         samples = rng.random([n_dim, num_samples]).T
 
+        # Check which points fall within each Problem Space,  more points land in both spaces --> higher similarity
         prblm_mask_A = np.all(np.logical_and(samples >= A_normal.min(axis=0), samples <= A_normal.max(axis=0)), axis=1)
         prblm_mask_B = np.all(np.logical_and(samples >= B_normal.min(axis=0), samples <= B_normal.max(axis=0)), axis=1)
 
-        return ss_similarity(prblm_mask_A, prblm_mask_B)
+        # Calculate the similarity in the same way as the solution space
+        return space_similarity(prblm_mask_A, prblm_mask_B)
     
     def sensitivity(self, designB, num_samples=100_000):
         dS = 1 - self.solution_space_similarity(designB, num_samples=num_samples)

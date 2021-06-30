@@ -3,73 +3,76 @@
         "descr":    "Side length of cube frame",
         "type":     "continuous",
         "values":   [21.0, 27.0]
-        },
+    },
 
     "q":    {
         "descr":    "Width of stiffening plate",
         "type":     "continuous",
         "values":   [2.0, 10.0]
-        },
+    },
 
     "t":    {
         "descr":    "Material thickness of stiffening plate",
         "type":     "continuous",
         "values":   [0.1, 0.2]
-        },
+    },
 
     "Y":    {
         "descr":    "Young's modulus of stiffening plate material",
         "type":     "continuous",
         "values":   [9e6, 12e6]
-        },
+    },
 
     "G":    {
         "descr":    "Unsupported length of printer gantry",
         "type":     "continuous",
         "values":   [10.0, 35.00]
-        },
+    },
     
     "w":    {
         "descr":    "Width of gantry bar",
         "type":     "continuous",
         "values":   [0.25, 1.50]
-        },
+    },
     
     "h":    {
         "descr":    "Height of gantry bar",
         "type":     "continuous",
         "values":   [0.05, 0.75]
-        },
+    },
     
     "t_f":    {
         "descr":    "Floor thickness of gantry bar",
         "type":     "continuous",
         "values":   [0.01, 0.20]
-        },
+    },
 
     "t_w":    {
         "descr":    "Wall thickness of gantry bar",
         "type":     "continuous",
         "values":   [0.01, 0.15]
-        },
+    },
 
     "mu":    {
         "descr":    "Smallest microstepping capability of motor drivers/board",
         "type":     "explicit",
         "values":   [0.0625, 0.125, 0.25]
-        },
+    },
 
-    "p":    {
-        "descr":    "Pitch of belt pulleys in coreXY system",
-        "type":     "continuous",
-        "values":   [1.0, 3.0]
-        },
-
-    "n":    {
-        "descr":    "Number teeth on pulleys in coreXY system",
-        "type":     "discrete",
-        "values":   [15, 50, 1]
-        },
+    "Screw":    {
+        "descr":    "Leadscrew selection",
+        "type":     "coupled",
+        "values":   {
+            "1": {"d": 8.0, "p": 0.012, "nu": 21},
+            "2": {"d": 8.0, "p": 0.049, "nu": 89},
+            "3": {"d": 9.5, "p": 0.025, "nu": 21},
+            "4": {"d": 9.5, "p": 0.125, "nu": 84},
+            "5": {"d": 10.0, "p": 0.039, "nu": 79},
+            "6": {"d": 10.0, "p": 0.196, "nu": 85},
+            "7": {"d": 12.0, "p": 0.049, "nu": 86},
+            "8": {"d": 12.0, "p": 0.197, "nu": 88}
+        }
+    },
 
     "Motor":    {
         "descr":    "Stepper motor selection",

@@ -119,7 +119,7 @@ def test_shared_form_points(designA, designB, samples, return_samples=False):
 
 def solution_space_similarity(designA, designB, **kwargs):
     samples = designA.generate_samples(kwargs['num_samples'])
-    soln_mask_A, soln_mask_B = test_shared_form_points(designA, designB, samples=samples, return_samples=False)
+    soln_mask_A, soln_mask_B, _ = test_shared_form_points(designA, designB, samples=samples, return_samples=False)
 
     # Run similarity measure on masks
     return space_similarity(soln_mask_A, soln_mask_B)
@@ -152,6 +152,11 @@ def solution_space_overlay(designA, designB, **kwargs):
     labels[mask_B] = 1
     labels[mask_Both] = 2
 
+    # labels = np.full(len(df), '', dtype=np.dtype('U4'))
+    # labels[mask_A] = 'A'
+    # labels[mask_B] = 'B'
+    # labels[mask_Both] = 'Both'
+
     df['labels'] = labels
     hue = 'labels'
 
@@ -175,7 +180,21 @@ def solution_space_overlay(designA, designB, **kwargs):
         #     ('double' if event.dblclick else 'single', event.button,
         #     event.x, event.y, event.xdata, event.ydata))
 
-    plot = sns.pairplot(df, hue=hue, diag_kind='kde', corner=True, aspect=1, height=0.9, palette='deep', plot_kws=dict(s=8))
+    # df.labels.map({0: 'A', 1: 'B', 2: 'Both'})
+    df.labels = df.labels.replace({0: 'A', 1: 'B', 2: 'Both'})
+    plot = sns.pairplot(
+        df, hue=hue, diag_kind=None, corner=True, aspect=1, height=0.9, palette='deep',
+        plot_kws=dict(s=8), diag_kws=dict(visible=False))
+    
+    # plot = sns.PairGrid(df, hue=hue, corner=True, height=1, aspect=1)
+    # plot.map_lower(sns.scatterplot)
+    # plot.map_diag(sns.kdeplot)
+    # plot.add_legend(labels=['A','B','Both'])
+
+
+    # handles = plot._legend_data.values()
+    # plot.fig.legend(handles=handles, labels=['A','B','Both'])
+
     plot.fig.canvas.mpl_connect('button_press_event', onclick)
     plt.show()
 

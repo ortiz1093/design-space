@@ -53,7 +53,7 @@
         "values":   [0.01, 0.15]
         },
 
-    "mu":    {
+        "mu":    {
         "descr":    "Smallest microstepping capability of motor drivers/board",
         "type":     "explicit",
         "values":   [0.0625, 0.125, 0.25]
@@ -85,6 +85,6 @@
             "8": {"L": 2.9e-3, "V": 3.4, "Amp": 2.8, "phi": 1.8},
             "9": {"L": 9.0e-3, "V": 12.0, "Amp": 0.8, "phi": 1.8},
             "10": {"L": 3.8e-3, "V": 3.06, "Amp": 10.7, "phi": 1.8}
+                    }
         }
-    }
 }
