@@ -4,4 +4,7 @@ thesisEnv
 ExampleSpaces.m
 *.xlsx
 *.doc
+*.png
+*.jpg
+*.jpeg
 
