@@ -6,6 +6,6 @@
 
     "m": {
         "text": "The mass of the product must be between 30 and 75 kg, inclusive",
-        "allowable range": [50, 75]
+        "allowable range": [15e3, 40e3]
     }
 }

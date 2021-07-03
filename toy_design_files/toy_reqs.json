@@ -1,11 +1,11 @@
 {
     "V": {
         "text": "The volume of the product must be between 10 and 20 m^3, inclusive.",
-        "allowable range": [10, 20]
+        "allowable range": [25, 50]
     },
 
     "m": {
         "text": "The mass of the product must be between 30 and 75 kg, inclusive",
-        "allowable range": [30, 75]
+        "allowable range": [20e3, 60e3]
     }
 }

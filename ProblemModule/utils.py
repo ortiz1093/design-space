@@ -138,9 +138,13 @@ def pairplot_overlay(df1, df2):
 
 
 def solution_space_overlay(designA, designB, **kwargs):
+    axisTitleFontSize = 28
+    layoutFontSize = 18
+
     samples = designA.generate_samples(kwargs['num_samples'])
     mask_A, mask_B, samples = test_shared_form_points(designA, designB, samples=samples, return_samples=True)
     mask_Both = np.logical_and(mask_A, mask_B)
+    soln_idxs = np.logical_or(mask_A, mask_B)
 
     col_names = [var[0] for var in samples if var[2]]
     sample_data = np.vstack(([var[1] for var in samples if isinstance(var, tuple) and var[2]])).T
@@ -160,43 +164,73 @@ def solution_space_overlay(designA, designB, **kwargs):
     df['labels'] = labels
     hue = 'labels'
 
-    def onclick(event):
-        axes = event.inaxes
-        axis_names = df.columns
-        # x_name = axis_names[axes.colNum]
-        # y_name = axis_names[axes.rowNum]
-        x_name = axis_names[axes.get_subplotspec().colspan.start]
-        y_name = axis_names[axes.get_subplotspec().rowspan.start]
-        x = df[x_name]
-        y = df[y_name]
-        hu = df[hue] if hue else None
-        plt.figure()
-        clk_ax = sns.scatterplot(x=x, y=y, hue=hu, palette='deep')
-        clk_ax.xaxis.xlabel = x_name
-        clk_ax.xaxis.ylabel = y_name
+    if len(col_names) == 2:
+        fig = go.Figure(
+            data=[
+                go.Scatter(
+                    x=df.iloc[mask_A, 0], y=df.iloc[mask_A, 1],
+                    mode='markers', marker_color='blue', name='A'
+                ),
+                go.Scatter(
+                    x=df.iloc[mask_B, 0], y=df.iloc[mask_B, 1],
+                    mode='markers', marker_color='red', name='B'
+                ),
+                go.Scatter(
+                    x=df.iloc[mask_Both, 0], y=df.iloc[mask_Both, 1],
+                    mode='markers', marker_color='purple', name='Both'
+                ),
+            ],
+            layout_xaxis_title=dict(
+                text=col_names[0],
+                font_size=axisTitleFontSize
+            ),
+            layout_yaxis_title=dict(
+                text=col_names[1],
+                font_size=axisTitleFontSize,
+            ),
+            layout_font=dict(size=layoutFontSize),
+            layout_scene_aspectmode='manual',
+            layout_scene_aspectratio=dict(x=0, y=0, z=0)
+        )
+        fig.show()
+    else:
+        def onclick(event):
+            axes = event.inaxes
+            axis_names = df.columns
+            # x_name = axis_names[axes.colNum]
+            # y_name = axis_names[axes.rowNum]
+            x_name = axis_names[axes.get_subplotspec().colspan.start]
+            y_name = axis_names[axes.get_subplotspec().rowspan.start]
+            x = df[x_name]
+            y = df[y_name]
+            hu = df[hue] if hue else None
+            plt.figure()
+            clk_ax = sns.scatterplot(x=x, y=y, hue=hu, palette='deep')
+            clk_ax.xaxis.xlabel = x_name
+            clk_ax.xaxis.ylabel = y_name
+            plt.show()
+            # print(event.inaxes)
+            # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+            #     ('double' if event.dblclick else 'single', event.button,
+            #     event.x, event.y, event.xdata, event.ydata))
+
+        # df.labels.map({0: 'A', 1: 'B', 2: 'Both'})
+        df.labels = df.labels.replace({0: 'A', 1: 'B', 2: 'Both'})
+        plot = sns.pairplot(
+            df, hue=hue, diag_kind='kde', corner=True, aspect=1, height=0.9, palette='deep',
+            plot_kws=dict(s=8), diag_kws=dict(visible=False))
+        
+        # plot = sns.PairGrid(df, hue=hue, corner=True, height=1, aspect=1)
+        # plot.map_lower(sns.scatterplot)
+        # plot.map_diag(sns.kdeplot)
+        # plot.add_legend(labels=['A','B','Both'])
+
+
+        # handles = plot._legend_data.values()
+        # plot.fig.legend(handles=handles, labels=['A','B','Both'])
+
+        plot.fig.canvas.mpl_connect('button_press_event', onclick)
         plt.show()
-        # print(event.inaxes)
-        # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-        #     ('double' if event.dblclick else 'single', event.button,
-        #     event.x, event.y, event.xdata, event.ydata))
-
-    # df.labels.map({0: 'A', 1: 'B', 2: 'Both'})
-    df.labels = df.labels.replace({0: 'A', 1: 'B', 2: 'Both'})
-    plot = sns.pairplot(
-        df, hue=hue, diag_kind=None, corner=True, aspect=1, height=0.9, palette='deep',
-        plot_kws=dict(s=8), diag_kws=dict(visible=False))
-    
-    # plot = sns.PairGrid(df, hue=hue, corner=True, height=1, aspect=1)
-    # plot.map_lower(sns.scatterplot)
-    # plot.map_diag(sns.kdeplot)
-    # plot.add_legend(labels=['A','B','Both'])
-
-
-    # handles = plot._legend_data.values()
-    # plot.fig.legend(handles=handles, labels=['A','B','Both'])
-
-    plot.fig.canvas.mpl_connect('button_press_event', onclick)
-    plt.show()
 
 
 if __name__ == "__main__":
