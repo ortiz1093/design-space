@@ -3,6 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from ProblemModule.mca import categorize1D, factor_space_projection
 
+import plotly.graph_objects as go
+import plotly.figure_factory as ff
+
 
 class FormSpace:
     # TODO: Implement feature extraction functionality (low priority)
@@ -40,7 +43,7 @@ class FormSpace:
             codes = self.categorical_axes[col].cat.codes
             self.points_df[col] = codes
 
-    def build_solution_space(self, max_dim=10, full_space=True, show_fails=False, show_gradient=False):
+    def build_solution_space(self, max_dim=10, full_space=True, show_fails=False, show_gradient=False, **kwargs):
         if full_space:
             df = self.points_df.astype(float)
         else:
@@ -55,48 +58,64 @@ class FormSpace:
             hue = 'solution'
             df[hue] = self.solution_points
         elif show_gradient:
-            hue = 'gradient'
+            hue = 'utility'
             # hue = self.gradient[self.solution_points]
             df[hue] = self.gradient
 
         if full_space and not show_fails:
             df = df[self.solution_points]
 
+        import plotly.express as px
+
         diag_kind = 'auto' if show_gradient else 'kde'
+        self.plot = px.scatter_matrix(
+            df,
+            dimensions=df.columns[:-1],
+            color=hue)
+        self.plot.update_traces(
+            diagonal_visible=False,
+            showupperhalf=False,
+            marker=dict(
+                color=kwargs.get('color', 'blue'),
+                size=4, opacity=1.0,
+                showscale=False, # colors encode categorical variables
+                line_color='whitesmoke', line_width=0.5))
+        # self.plot.update_yaxes(matches='y')
 
-        self.plot = sns.pairplot(df, hue=hue, diag_kind=diag_kind,
-                                 corner=True, aspect=1, height=1)
+        # self.plot = sns.pairplot(df, hue=hue, diag_kind=diag_kind,
+        #                          corner=True, aspect=1, height=1)
 
-        if not (show_fails or show_gradient):
-            self.plot.map_lower(sns.kdeplot, levels=4, color=".2")
+        # if not (show_fails or show_gradient):
+        #     self.plot.map_lower(sns.kdeplot, levels=4, color=".2")
         
-        def onclick(event):
-            axes = event.inaxes
-            axis_names = df.columns
-            # x_name = axis_names[axes.colNum]
-            x_name = axis_names[axes.get_subplotspec().colspan.start]
-            # y_name = axis_names[axes.rowNum]
-            y_name = axis_names[axes.get_subplotspec().rowspan.start]
-            x = df[x_name]
-            y = df[y_name]
-            hu = df[hue] if hue else None
-            plt.figure()
-            clk_ax = sns.scatterplot(x=x, y=y, hue=hu)
-            clk_ax.xaxis.xlabel = x_name
-            clk_ax.xaxis.ylabel = y_name
-            plt.show()
-            # print(event.inaxes)
-            # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-            #     ('double' if event.dblclick else 'single', event.button,
-            #     event.x, event.y, event.xdata, event.ydata))
+        # def onclick(event):
+        #     axes = event.inaxes
+        #     axis_names = df.columns
+        #     # x_name = axis_names[axes.colNum]
+        #     x_name = axis_names[axes.get_subplotspec().colspan.start]
+        #     # y_name = axis_names[axes.rowNum]
+        #     y_name = axis_names[axes.get_subplotspec().rowspan.start]
+        #     x = df[x_name]
+        #     y = df[y_name]
+        #     hu = df[hue] if hue else None
+        #     plt.figure()
+        #     clk_ax = sns.scatterplot(x=x, y=y, hue=hu)
+        #     clk_ax.xaxis.xlabel = x_name
+        #     clk_ax.xaxis.ylabel = y_name
+        #     plt.show()
+        #     # print(event.inaxes)
+        #     # print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
+        #     #     ('double' if event.dblclick else 'single', event.button,
+        #     #     event.x, event.y, event.xdata, event.ydata))
 
-        self.plot.fig.canvas.mpl_connect('button_press_event', onclick)
+        # self.plot.fig.canvas.mpl_connect('button_press_event', onclick)
 
     def show_solution_space(self, **kwargs):
         if self.plot is None:
             self.build_solution_space(**kwargs)
 
-        plt.show()
+        # plt.show()
+        self.plot.show()
 
     def points2categorical(self):
         categorical_df = self.categorical_axes.copy(deep=True)

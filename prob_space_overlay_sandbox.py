@@ -10,6 +10,8 @@ start=perf_counter()
 
 FILL_COLORS = colors.qualitative.Plotly
 
+scale = lambda X: (X - X.min()) / (X.max() - X.min())
+
 
 def choose_ndim_point(axis_intervals, N):
     intervals = np.nan_to_num(axis_intervals)
@@ -46,10 +48,12 @@ def draw_box(x_range, y_range, **kwargs):
     x0, x1 = sorted(x_range)
     y0, y1 = sorted(y_range)
 
+    opacity = kwargs.get('opacity', 0.4)
+    kwargs = {key: value for key, value in kwargs.items() if key not in ['opacity']}
     # Create a scatter plot from corner points, remove lines and markers, fill box
     trace =  go.Scatter(
         x=[x0, x0, x1, x1, x0], y=[y0, y1, y1, y0, y0],
-        mode='none', fill='toself', opacity=0.4,
+        mode='none', fill='toself', opacity=opacity,
         **kwargs)
     
     return trace
@@ -189,7 +193,7 @@ def problem_space_overlays(x_range_list, y_range_list, **kwargs):
         ticktext=y_ticktext
     )
 
-    return traces, x_axis_params, y_axis_params
+    return traces, x_axis_params, y_axis_params, X_finite, Y_finite
 
 
 def problem_space_grid(self, range_list, **kwargs):
@@ -218,7 +222,7 @@ def problem_space_grid(self, range_list, **kwargs):
         y_ranges = range_list[i-1] if isinstance(range_list[i-1][0], list) else [range_list[i-1]]
 
         # get traces and axis parameters for each subplot from problem_space_overlays function
-        traces, x_axis_params, y_axis_params = problem_space_overlays(
+        traces, x_axis_params, y_axis_params, _, _ = problem_space_overlays(
             x_ranges,
             y_ranges,
             showlegend=idx == 0,  # Only show each space in legend once
@@ -265,55 +269,164 @@ def problem_space_grid(self, range_list, **kwargs):
     )
 
 
-# Add extensions to imported objects
-go.Figure.problem_space_grid = problem_space_grid
+def points_2_problem_space(self, X, range_list, **kwargs):
+    '''
+    Extension method for go.Figure
 
-# A_rg1 = [-2, np.inf]
-# B_rg1 = [5, 30]
-# C_rg1 = [-10, 10]
-# D_rg1 = [-np.inf, 7]
+    Creates a problem space overlay for every pair of axes in the problem space and arranges subplots into upper
+    triangular subplot matrix.
+    '''
 
-# A_rg2 = [-5, np.inf]
-# B_rg2 = [0, 25]
-# C_rg2 = [-15, 15]
-# D_rg2 = [-np.inf, 26]
+    # grid_dim = len(range_list) - 1
+    # self.set_subplots(grid_dim, grid_dim, vertical_spacing=0.01, horizontal_spacing=0.03)
 
-# ranges = [A_rg1, B_rg1, C_rg1, D_rg1]
-# ranges = [[A_rg1, A_rg2], [B_rg1, B_rg2], [C_rg1, C_rg2], [D_rg1, D_rg2]]
+    # subplot_idxs = [(i + 1, j + 1) for i in range(grid_dim) for j in range(i, grid_dim)]
 
-rgA = [
-    [-0.001, 0.001],
-    [-0.001, 0.001],
-    [-0.005, 0.005],
-    [8.0, np.inf],
-    [8.0, np.inf],
-    [16.0, np.inf],
-    [0.0, 0.001]
-]
+    # axis_labels = kwargs.get('axis_labels', [f'Axis {i}' for i in range(grid_dim + 1)])
+    # kwargs = {key: value for key, value in kwargs.items() if key not in ['axis_labels']}
 
-rgB = [
-    [-0.00025, 0.0025],
-    [-0.001, 0.001],
-    [-0.0025, 0.0025],
-    [6.0, np.inf],
-    [6.0, np.inf],
-    [18.0, np.inf],
-    [0.0, 0.003]
-]
+    # for i, j in subplot_idxs:
+    #     x_idx = j
+    #     y_idx = i - 1
 
-ranges = list(zip(rgA, rgB))
-axis_labels = ['dx', 'dG', 'dy', 'Dx', 'Dy', 'v', 'res']
-# axis_labels = ['Frame<br>Deflection<br>X', 'Gantry<br>Deflection', 'Frame<br>Deflection<br>Y', 'X-Travel', 'Y-Travel', 'Max<br>Printhead<br>Velocity', 'Print<br>Head<br>Resolution']
+    #     self.add_trace(draw_box(range_list[x_idx], range_list[y_idx], **kwargs), row=i, col=j)
+    #     self.add_trace(go.Scatter(x=X[x_idx], y=X[y_idx], mode='markers', **kwargs), row=i, col=j)
 
-# N = 50
-# ptsA = choose_ndim_point(rgA, N)
-# ptsB = choose_ndim_point(rgB, N)
-# points = np.hstack([ptsA, ptsB])
-# in_both = np.logical_and(isinspace(points.T, rgA), isinspace(points.T, rgB))
 
-fig = go.Figure()
-fig.problem_space_grid(ranges, axis_labels=axis_labels)
+    pass
 
-fig.show()
+    # Set number of rows and columns and create subplots
+    grid_dim = len(range_list) - 1
+    self.set_subplots(grid_dim, grid_dim, vertical_spacing=0.01, horizontal_spacing=0.03)
 
-print(round(perf_counter() - start, 2))
+    # Create list of coordinate pairs for faster looping
+    axis_coords = [(i + 1, j + 1) for i in range(grid_dim) for j in range(i, grid_dim)]
+
+    # Get axis labels if provided in method call and remove from kwargs dict
+    axis_labels = kwargs.get('axis_labels', [f'Axis {i}' for i in range(grid_dim + 1)])
+    kwargs = {key: value for key, value in kwargs.items() if key not in ['axis_labels']}
+
+    for idx, (i, j) in enumerate(axis_coords):
+
+        # If only one range provided, convert to nested list else leave as is (for problem_space_overlays compatibility)
+        x_ranges = range_list[j] if isinstance(range_list[j][0], list) else [range_list[j]]
+        y_ranges = range_list[i-1] if isinstance(range_list[i-1][0], list) else [range_list[i-1]]
+
+        # get traces and axis parameters for each subplot from problem_space_overlays function
+        traces, x_axis_params, y_axis_params, X_scaled, Y_scaled = problem_space_overlays(
+            x_ranges,
+            y_ranges,
+            showlegend=idx == 0,  # Only show each space in legend once
+            **kwargs)
+
+        # Add each trace to appropriate subplot and specify axis params for subplot
+        for trace in traces:
+            self.add_trace(trace, row=i, col=j)
+
+        x_min, x_max = X_scaled.min(), X_scaled.max()
+        y_min, y_max = Y_scaled.min(), Y_scaled.max()
+
+        x_uns = X[j]
+        y_uns = X[i-1]
+
+        x_uns[x_uns==np.inf] = x_max
+        y_uns[y_uns==np.inf] = y_max
+        x_uns[x_uns==-np.inf] = x_min
+        y_uns[y_uns==-np.inf] = y_min
+
+        x = (x_uns - x_min) / (x_max - x_min)
+        y = (y_uns - y_min) / (y_max - y_min)
+
+        self.add_trace(
+            go.Scatter(
+                x=x, y=y,
+                mode='markers', marker_color='red', marker_size=4,
+                showlegend=False, **kwargs),
+            row=i, col=j)
+
+        self.update_xaxes(
+            x_axis_params, row=i, col=j,  # Add axis params from problem_space_overlays method
+            ticks="outside" if i == 1 else None,  # Only place ticks on certain subplots
+            showticklabels=i == 1, tickangle=-45,  # Only place axis label on certain subplots, rotate tickval
+            title=axis_labels[j] if i == 1 else None,  # Only show axis title on certain subplots
+            tickfont=dict(size=11),  # Specify tickval font parameters
+            side = 'top' if i == 1 else None,  # Specify which edge of subplot to place axis labels / title
+            matches = 'x'
+        )
+
+        self.update_yaxes(
+            y_axis_params, row=i, col=j,  # Add axis params from problem_space_overlays method
+            ticks="outside" if j == grid_dim else None,  # Only place ticks on certain subplots
+            showticklabels=j == grid_dim, tickangle=0,  # Only place axis label on certain subplots, rotate tickval
+            title=axis_labels[i - 1] if j == grid_dim else None,  # Only show axis title on certain subplots
+            tickfont=dict(size=11),  # Specify tickval font parameters
+            side = 'right' if j == grid_dim else None,  # Specify which edge of subplot to place axis labels / title
+            matches = 'y'
+        )
+
+    # Specify common layout paramters
+    self.update_layout(
+        legend=dict(
+            yanchor="bottom",
+            y=0.3,
+            xanchor="left",
+            x=0.3
+        )
+    )
+
+if __name__ == "__main__":
+
+    # Add extensions to imported objects
+    go.Figure.problem_space_grid = problem_space_grid
+    go.Figure.points_2_problem_space = points_2_problem_space
+
+    # A_rg1 = [-2, np.inf]
+    # B_rg1 = [5, 30]
+    # C_rg1 = [-10, 10]
+    # D_rg1 = [-np.inf, 7]
+
+    # A_rg2 = [-5, np.inf]
+    # B_rg2 = [0, 25]
+    # C_rg2 = [-15, 15]
+    # D_rg2 = [-np.inf, 26]
+
+    # ranges = [A_rg1, B_rg1, C_rg1, D_rg1]
+    # ranges = [[A_rg1, A_rg2], [B_rg1, B_rg2], [C_rg1, C_rg2], [D_rg1, D_rg2]]
+
+    # rgA = [
+    #     [-0.001, 0.001],
+    #     [-0.001, 0.001],
+    #     [-0.005, 0.005],
+    #     [8.0, np.inf],
+    #     [8.0, np.inf],
+    #     [16.0, np.inf],
+    #     [0.0, 0.001]
+    # ]
+
+    rgB = [
+        [-0.00025, 0.0025],
+        [-0.001, 0.001],
+        [-0.0025, 0.0025],
+        [6.0, 36],
+        [6.0, 36],
+        [18.0, 100],
+        [0.0, 0.003]
+    ]
+
+    # ranges = list(zip(rgA, rgB))
+    axis_labels = ['dx', 'dG', 'dy', 'Dx', 'Dy', 'v', 'res']
+    # axis_labels = ['Frame<br>Deflection<br>X', 'Gantry<br>Deflection', 'Frame<br>Deflection<br>Y', 'X-Travel', 'Y-Travel', 'Max<br>Printhead<br>Velocity', 'Print<br>Head<br>Resolution']
+
+    N = 50
+    # ptsA = choose_ndim_point(rgA, N)
+    ptsB = choose_ndim_point(rgB, N)
+    # points = np.hstack([ptsA, ptsB])
+    # in_both = np.logical_and(isinspace(points.T, rgA), isinspace(points.T, rgB))
+
+    fig = go.Figure()
+    # fig.problem_space_grid(rgB, axis_labels=axis_labels)
+    fig.points_2_problem_space(ptsB, rgB, axis_labels=axis_labels)
+
+    fig.show()
+
+    print(round(perf_counter() - start, 2))

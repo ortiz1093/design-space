@@ -1,7 +1,7 @@
 {
     "dx": {
         "text": "Top plane of the frame must deform more than 0.001 in the x-direction",
-        "allowable range": [-0.00025,   0.0025]
+        "allowable range": [-0.005,   0.005]
     },
 
     "dG": {
@@ -11,26 +11,27 @@
 
     "dy": {
         "text": "Top plane of the frame must deform more than 0.005 in the y-direction",
-        "allowable range": [-0.0025,   0.0025]
+        "allowable range": [-0.005,   0.005]
     },
 
     "Dx": {
         "text": "The print nozzle must have at least 8 in of travel in the x-direction",
-        "allowable range": [6.0,   1e308]
+        "allowable range": [8.0,   1e308]
     },
 
     "Dy": {
         "text": "The print nozzle must have at least 8 in of travel in the y-direction",
-        "allowable range": [6.0,   1e308]
+        "allowable range": [8.0,   1e308]
     },
 
     "v": {
         "text": "The print nozzle must be capable of travelling 16 in/s or greater",
-        "allowable range": [18.0,   1e308]
+        "allowable range": [8.0,   1e308]
     },
 
     "res": {
         "text": "The print nozzle must be capable of achieving a resolution of 0.001 in or less",
-        "allowable range": [0.0, 0.003]
+        "allowable range": [0.0, 0.1]
     }
 }
+

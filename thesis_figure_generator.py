@@ -7,6 +7,9 @@ import plotly.express as px
 import pandas as pd
 import json
 from sympy import sympify, lambdify
+from prob_space_overlay_sandbox import points_2_problem_space
+
+go.Figure.points_2_problem_space = points_2_problem_space
 
 
 # Function for MinMax scaling data
@@ -19,7 +22,7 @@ side_qlty = lambda x: x
 
 # Utility function
 utility = lambda res_axis, pwr_axis, side_axis: \
-    (3 * scale(res_qlty(res_axis)) + 1 * scale(power_qlty(pwr_axis)) + 2 * scale(side_qlty(side_axis))) / (3 + 1 + 2)
+    (8 * scale(res_qlty(res_axis)) + 4 * scale(power_qlty(pwr_axis)) + 2 * scale(side_qlty(side_axis)))
 
 
 def str2function(str_expression):
@@ -29,19 +32,28 @@ def str2function(str_expression):
     return lambdify(inputs, sym_exp, 'numpy')
 
 
-def get_objective_points(formA_dict, solnA, formB_dict, solnB):
+def get_objective_pointsA(formA_dict, solnA):
     motor_V_opts = np.array([3.5, 4.0, 12.0, 6.0, 24.0, 6.0, 12.0, 3.4, 12.0, 3.06])
     motor_Amp_opts = np.array([1.0, 1.5, 3.6, 1.0, 0.3, 1.3, 0.7, 2.8, 0.8, 0.7])
 
     ########## Design A ################
-    muA = formA_dict['mu'][solnA]
-    pA = formA_dict['p'][solnA]
-    nA = formA_dict['n'][solnA]
+    # muA = formA_dict['mu'][solnA]
+    # pA = formA_dict['p'][solnA]
+    # nA = formA_dict['n'][solnA]
+    # phiA = [1.8]*len(muA)
+    # motorA = formA_dict['Motor'][solnA].astype(int) - 1
+    # motor_VA = motor_V_opts[motorA]
+    # motor_AmpA = motor_Amp_opts[motorA]
+    # sA = formA_dict['s'][solnA]
+
+    muA = formA_dict['mu']
+    pA = formA_dict['p']
+    nA = formA_dict['n']
     phiA = [1.8]*len(muA)
-    motorA = formA_dict['Motor'][solnA].astype(int) - 1
+    motorA = formA_dict['Motor'].astype(int) - 1
     motor_VA = motor_V_opts[motorA]
     motor_AmpA = motor_Amp_opts[motorA]
-    sA = formA_dict['s'][solnA]
+    sA = formA_dict['s']
 
     # Get design criteria
     criteria_fileA = 'example_design_files/DesignA_coreXY/design_criteria_A.json'
@@ -58,22 +70,40 @@ def get_objective_points(formA_dict, solnA, formB_dict, solnB):
     sideA = side_lenA(sA)
     utlA = utility(resA, pwrA, sideA)
 
-    ########## Design B ################
+    return resA, pwrA, sideA, utlA
+
+
+def get_objective_pointsB(formB_dict, solnB):
+    motor_V_opts = np.array([24, 24, 24, 24, 24, 24, 36, 36, 36, 36, 36, 36])
+    motor_Amp_opts = np.array([1.6, 1.0, 1.7, 2.7, 2.5, 3.9, 1.6, 1.0, 1.7, 2.7, 2.5, 3.9])
     screw_p_opts = np.array([0.012, 0.049, 0.159, 0.025, 0.125, 0.200, 0.039, 0.196, 0.049, 0.197])
     screw_nu_opts = np.array([21, 89, 86, 21, 84, 84, 79, 85, 86, 88])
 
-    muB = formB_dict['mu'][solnB]
+    # muB = formB_dict['mu'][solnB]
+    # phiB = [1.8]*len(muB)
+
+    # screwB = formB_dict['Screw'][solnB].astype(int) - 1
+    # screw_pB = screw_p_opts[screwB]
+    # screw_nuB = screw_nu_opts[screwB]
+
+
+    # motorB = formB_dict['Motor'][solnB].astype(int) - 1
+    # motor_VB = motor_V_opts[motorB]
+    # motor_AmpB = motor_Amp_opts[motorB]
+    # sB = formB_dict['s'][solnB]
+
+    muB = formB_dict['mu']
     phiB = [1.8]*len(muB)
 
-    screwB = formB_dict['Screw'][solnB].astype(int) - 1
+    screwB = formB_dict['Screw'].astype(int) - 1
     screw_pB = screw_p_opts[screwB]
     screw_nuB = screw_nu_opts[screwB]
 
 
-    motorB = formB_dict['Motor'][solnB].astype(int) - 1
+    motorB = formB_dict['Motor'].astype(int) - 1
     motor_VB = motor_V_opts[motorB]
     motor_AmpB = motor_Amp_opts[motorB]
-    sB = formB_dict['s'][solnB]
+    sB = formB_dict['s']
 
     # Get design criteria
     criteria_fileB = 'example_design_files/DesignB_leadScrew/design_criteria_B.json'
@@ -90,7 +120,7 @@ def get_objective_points(formA_dict, solnA, formB_dict, solnB):
     sideB = side_lenB(sB)
     utlB = utility(resB, pwrB, sideB)
 
-    return resA, pwrA, sideA, utlA, resB, pwrB, sideB, utlB
+    return resB, pwrB, sideB, utlB
 
 
 def objective_space(resA, pwrA, sideA, utlA, resB, pwrB, sideB, utlB):
@@ -300,87 +330,132 @@ def toy_design(num_pts):
     # print(solution_space_similarity(toy_designA, toy_designB, num_samples=1_000_000))
 
     # plots
-    toy_designA.plot_problem()
+    # toy_designA.plot_problem()
     # toy_designA.plot_solutions(show_fails=False)
     # pairplot_overlay(dfA, dfB)
     # solution_space_overlay(toy_designA, toy_designB, num_samples=num_pts)
-    # x = dict(
-    #     r=1.25,
-    #     rho=980
-    # )
-    # conformity(toy_designA.form_points, solA, x)
+    x = dict(
+        r=1.25,
+        rho=980
+    )
+    conformity(toy_designA.form_points, solA, x)
 
 
 def example_design(num_pts):
     reqs_file_A = 'example_design_files/example_design_reqs.json'
+    reqs_file_A2 = 'example_design_files/example_design_reqs2.json'
     vars_file_A = 'example_design_files/DesignA_coreXY/design_vars_A.json'
     func_file_A = 'example_design_files/DesignA_coreXY/design_funcs_A.json'
     # criteria_file_A = "/root/ThesisCode/example_design_files/example_design_criteria.json"
 
-    reqs_file_B = 'example_design_files/example_design_reqs.json'
+    reqs_file_B = 'example_design_files/example_design_reqs2.json'
     vars_file_B = 'example_design_files/DesignB_leadScrew/design_vars_B.json'
     func_file_B = 'example_design_files/DesignB_leadScrew/design_funcs_B.json'
     # criteria_file_B = "/root/ThesisCode/example_design_files/example_design_criteria.json"
 
-    # Generate Design A
-    designA = Design()
-    designA.load_requirements_from_json(reqs_file_A)
-    designA.append_variables_from_json(vars_file_A)
-    designA.set_map_from_json(func_file_A)
-    # designA.build_constraint_space()
-    designA.build_form_space(N=num_pts)
+    # # Generate Design A
+    # designA = Design()
+    # designA.load_requirements_from_json(reqs_file_A)
+    # designA.append_variables_from_json(vars_file_A)
+    # designA.set_map_from_json(func_file_A)
+    # # designA.build_constraint_space()
+    # designA.build_form_space(N=num_pts)
+
+    # # Generate Design A2
+    # designA2 = Design()
+    # designA2.load_requirements_from_json(reqs_file_A2)
+    # designA2.append_variables_from_json(vars_file_A)
+    # designA2.set_map_from_json(func_file_A)
+    # designA2.build_constraint_space()
+    # designA2.build_form_space(N=num_pts)
 
     # Generate Design B
     designB = Design()
     designB.load_requirements_from_json(reqs_file_B)
     designB.append_variables_from_json(vars_file_B)
     designB.set_map_from_json(func_file_B)
-    # designB.build_constraint_space()
+    designB.build_constraint_space()
     designB.build_form_space(N=num_pts)
 
-    rgsA = [req.values for req in designA.requirement_set]
-    rgsB = [req.values for req in designB.requirement_set]
-    syms = [req.symbol for req in designB.requirement_set]
+    # rgsA = [req.values for req in designA.requirement_set]
+    # rgsB = [req.values for req in designB.requirement_set]
+    # syms = [req.symbol for req in designB.requirement_set]
     # print(syms)
     # quit()
 
     # Solution dataframes
-    solA = designA.form_space.solution_points
-    solB = designB.form_space.solution_points
+    # solA = designA.form_space.solution_points
+    # solB = designB.form_space.solution_points
 
-    # resA, pwrA, sideA, utlA, resB, pwrB, sideB, utlB = get_objective_points(designA.form_points, solA, designB.form_points, solB)
+    # resA, pwrA, sideA, utlA = get_objective_pointsA(designA.form_points, solA) 
+    # resB, pwrB, sideB, utlB = get_objective_pointsB(designB.form_points, solB)
     # objective_space(resA, pwrA, sideA, utlA, resB, pwrB, sideB, utlB)
 
-    x = dict(
-        s=26,
-        q=9,
-        t=0.21,
-        Y=12.5e6,
-        G=40,
-        w=1.25,
-        h=0.5,
-        t_f=0.02,
-        t_w=0.175,
-        mu=0.125,
-        p=3.25,
-        n=35,
-        Motor=2
-    )
-    conformity(designA.form_points, solA, x)
+    # x = dict(
+    #     s=26,
+    #     q=9,
+    #     t=0.21,
+    #     Y=12.5e6,
+    #     G=40,
+    #     w=1.25,
+    #     h=0.5,
+    #     t_f=0.02,
+    #     t_w=0.175,
+    #     mu=0.125,
+    #     p=3.25,
+    #     n=35,
+    #     Motor=2
+    # )
+    # conformity(designA.form_points, solA, x)
 
     # print(solution_space_similarity(designA, designB, num_samples=num_pts))
 
     # plots
-    # designA.plot_problem()
-    # designA.plot_solutions(show_fails=False)
-    # pairplot_overlay(solA, solB)
-    # solution_space_overlay(designA, designB, num_samples=num_pts)
+    designB.constraint_space.build_problem_space()
+    C = designB.constraint_space.figure
+    C_pts = designB.constraint_points
+    # df = pd.DataFrame(C_pts)
+    # df.dG = np.random.uniform(-0.001, 0.001, 5000)
+    # C_scatter = px.scatter(df)
+    # C.update_traces(C_scatter.data[0])
+    # C.show()
 
-num_pts = 50_000
+    X = C_pts['dG']
+    Y = X * np.random.uniform(-0.001, 0.001, len(X))
+    Y[~X] = Y[~X] + np.random.choice([-1, 1], len(Y[~X]))*np.random.uniform(0.001, 0.01, len(Y[~X]))
+    C_pts['dG'] = Y
+    pts = np.array([arr for arr in C_pts.values()])[:, ::50]
+    axis_labels = [symbol for symbol in C_pts.keys()]
+    rgs = [req.values for req in designB.requirement_set]
+
+    fig = go.Figure()
+    fig.points_2_problem_space(pts, rgs, axis_labels=axis_labels)
+    fig.show()
+
+    pass
+
+
+
+    # Scale both utility scores to the same min max
+    # div = len(utlA)
+    # util_scaled = scale(np.hstack((utlA, utlB)))
+    # utlA_scaled = util_scaled[:div]
+    # utlB_scaled = util_scaled[div:]
+
+    # designA.form_space.set_value_gradient(scale(utlA))
+    # designA.plot_solutions(max_dim=15, show_fails=False, show_gradient=True)
+    # designA.form_space.set_value_gradient(utlA_scaled)
+    # designA.plot_solutions(max_dim=15, show_fails=False, show_gradient=True)
+    # designB.form_space.set_value_gradient(utlB_scaled)
+    # designB.plot_solutions(max_dim=15, show_fails=False, show_gradient=True)
+    # pairplot_overlay(solA, solB)
+    # solution_space_overlay(designA, designA2, num_samples=num_pts)
+
+num_pts = 5_000
 
 print("#"*45)
 
-toy_design(num_pts)
-# example_design(num_pts)
+# toy_design(num_pts)
+example_design(num_pts)
 
 print("#"*45)

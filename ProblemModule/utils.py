@@ -3,6 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+from plotly.subplots import make_subplots
+import plotly.express.colors as colors
+import string
 
 
 def continuous_continuous_space(rangeA, rangeB, color='plum', name=None,
@@ -156,6 +159,52 @@ def solution_space_overlay(designA, designB, **kwargs):
     labels[mask_B] = 1
     labels[mask_Both] = 2
 
+    df['labels'] = labels
+    hue = 'labels'
+
+    import plotly.express as px
+
+    plot = px.scatter_matrix(
+            df[labels==0],
+            dimensions=df.columns[:-1])
+    plot2 = px.scatter_matrix(
+            df[labels==1],
+            dimensions=df.columns[:-1])
+    plot3 = px.scatter_matrix(
+            df[labels==2],
+            dimensions=df.columns[:-1])
+    plot.add_trace(plot2.data[0])
+    plot.add_trace(plot3.data[0])
+    plot.update_traces(
+        diagonal_visible=False,
+        showupperhalf=False,
+        marker=dict(
+            color=labels,
+            size=4, opacity=1.0,
+            showscale=False, # colors encode categorical variables
+            line_color='whitesmoke', line_width=0.5))
+    plot.show()
+
+
+def dep_solution_space_overlay(designA, designB, **kwargs):
+    axisTitleFontSize = 28
+    layoutFontSize = 18
+
+    samples = designA.generate_samples(kwargs['num_samples'])
+    mask_A, mask_B, samples = test_shared_form_points(designA, designB, samples=samples, return_samples=True)
+    mask_Both = np.logical_and(mask_A, mask_B)
+    # soln_idxs = np.logical_or(mask_A, mask_B)
+
+    col_names = [var[0] for var in samples if var[2]]
+    sample_data = np.vstack(([var[1] for var in samples if isinstance(var, tuple) and var[2]])).T
+
+    df = pd.DataFrame(sample_data, columns=col_names)
+
+    labels = np.full(len(df), np.nan)
+    labels[mask_A] = 0
+    labels[mask_B] = 1
+    labels[mask_Both] = 2
+
     # labels = np.full(len(df), '', dtype=np.dtype('U4'))
     # labels[mask_A] = 'A'
     # labels[mask_B] = 'B'
@@ -232,7 +281,210 @@ def solution_space_overlay(designA, designB, **kwargs):
         plot.fig.canvas.mpl_connect('button_press_event', onclick)
         plt.show()
 
+############################# Problem Space Overlays #####################################
 
+def choose_ndim_point(axis_intervals, N):
+    intervals = np.nan_to_num(axis_intervals)
+    return np.array(
+        [np.random.uniform(*interval, N) for interval in intervals]
+    )
+
+
+def isinspace(pts, space_intervals):
+    results = []
+    for pt in pts:
+        results.append(
+            np.all(
+                [min(rg) < val < max(rg) for val, rg in zip(pt, space_intervals)]
+            )
+        )
+    return results
+
+
+def draw_box(x_range, y_range, **kwargs):
+    '''
+    Draws a box in a 2D plane given axis intervals
+    '''
+
+    # Get box corners from given intervals
+    x0, x1 = sorted(x_range)
+    y0, y1 = sorted(y_range)
+
+    opacity = kwargs.get('opacity', 0.4)
+    kwargs = {key: value for key, value in kwargs.items() if key not in ['opacity']}
+
+    # Create a scatter plot from corner points, remove lines and markers, fill box
+    trace =  go.Scatter(
+        x=[x0, x0, x1, x1, x0], y=[y0, y1, y1, y0, y0],
+        mode='none', fill='toself', opacity=opacity,
+        **kwargs)
+    
+    return trace
+
+
+def problem_space_overlays(x_range_list, y_range_list, **kwargs):
+    '''
+    Uses a set of x and y intervals to draw filled boxes in a 2D scatter plot. Allows for visualization of the overlap
+    between problem spaces.
+    '''
+    FILL_COLORS = colors.qualitative.Plotly
+
+    # Convert inputs to ndarrays
+    X = np.array(x_range_list)
+    Y = np.array(y_range_list)
+
+    # Sets buffer between boxes and edges of plot except when space extends to infinity
+    X_pad_lo = 0 if -np.inf in X else 0.2
+    X_pad_hi = 0 if np.inf in X else 0.2
+    Y_pad_lo = 0 if -np.inf in Y else 0.2
+    Y_pad_hi = 0 if np.inf in Y else 0.2
+
+    # Changes inf values to be a multiple of the highest finite value so that the plot scale makes the overlap visible
+    inf_pad = 2
+    X_finite, Y_finite = X.copy(), Y.copy()
+    X_finite[X==np.inf] = inf_pad * np.sort(X[X!=np.inf].flatten())[-1]
+    Y_finite[Y==np.inf] = inf_pad * np.sort(Y[Y!=np.inf].flatten())[-1]
+    X_finite[X==-np.inf] = -inf_pad * np.sort(X[X!=np.inf].flatten())[-1]
+    Y_finite[Y==-np.inf] = -inf_pad * np.sort(Y[Y!=np.inf].flatten())[-1]
+
+    # Scale ranges for nicer plotting, puts everything on interval [0, 1]
+    X_scaled = (X_finite - X_finite.min()) / (X_finite.max() - X_finite.min())
+    Y_scaled = (Y_finite - Y_finite.min()) / (Y_finite.max() - Y_finite.min())
+
+    # Get color from kwargs if given, else set color
+    fillcolor = kwargs.get('fillcolor')  # Get space color if provided in function call
+    color_flag = fillcolor is not None  # Flag whether color was provided in function call
+    plotly_colors = iter(FILL_COLORS)  # Create an iterable of color options for coloring spaces
+
+    # Get name from kwargs if given, else set name
+    name = kwargs.get('name')  # Get space label if provided in function call
+    name_flag = name is not None  # Flag whether name was provided in function call
+    letters = iter(string.ascii_letters[26:])  # Create an iterable of capital letters for labeling spaces
+
+    # Remove name and fillcolor from kwargs dict and repackage for passing to next function
+    kwargs = {key: value for key, value in kwargs.items() if key not in ['name', 'fillcolor']}
+
+    num_boxes = X.shape[0]  # Number of spaces to draw
+    traces = []  # Collector for traces
+
+    for i in range(num_boxes):
+        # Set name and fillcolor
+        fillcolor = fillcolor if color_flag else next(plotly_colors)
+        name = name if name_flag else f'Space {next(letters)}'
+
+        # Call to draw_box to create a filled box for each space
+        traces.append(
+            draw_box(
+                X_scaled[i], Y_scaled[i],
+                fillcolor=fillcolor,
+                name=name,
+                **kwargs)
+        )
+    
+    # Uses edges of scaled boxes for tick locations
+    x_tickvals = np.sort(X_scaled.flatten())
+    y_tickvals = np.sort(Y_scaled.flatten())
+
+    # Relabel ticks with original interval limits (gives appearance that boxes actually extend to original limits)
+    x_ticktext = np.sort(X.flatten()).astype(str)
+    y_ticktext = np.sort(Y.flatten()).astype(str)
+
+    # Use padding from earlier to create space between boxes and plot edge except when space goes to infinity
+    x_range = [X_scaled.min() - X_pad_lo, X_scaled.max() + X_pad_hi]
+    y_range = [Y_scaled.min() - Y_pad_lo, Y_scaled.max() + Y_pad_hi]
+
+    # Collect axis settings in dict for easy passing to go.Layout
+    x_axis_params = dict(
+        range=x_range,
+        tickmode='array',
+        tickvals=x_tickvals,
+        ticktext=x_ticktext
+    )
+    y_axis_params = dict(
+        range=y_range,
+        tickmode='array',
+        tickvals=y_tickvals,
+        ticktext=y_ticktext
+    )
+
+    return traces, x_axis_params, y_axis_params
+
+
+def problem_space_grid(self, range_list, **kwargs):
+    '''
+    Extension method for go.Figure
+
+    Creates a problem space overlay for every pair of axes in the problem space and arranges subplots into upper
+    triangular subplot matrix.
+    '''
+
+    # Set number of rows and columns and create subplots
+    grid_dim = len(range_list) - 1
+    self.set_subplots(grid_dim, grid_dim, vertical_spacing=0.01, horizontal_spacing=0.03)
+
+    # Create list of coordinate pairs for faster looping
+    axis_coords = [(i + 1, j + 1) for i in range(grid_dim) for j in range(i, grid_dim)]
+
+    # Get axis labels if provided in method call and remove from kwargs dict
+    axis_labels = kwargs.get('axis_labels', [f'Axis {i}' for i in range(grid_dim + 1)])
+    kwargs = {key: value for key, value in kwargs.items() if key not in ['axis_labels']}
+
+    for idx, (i, j) in enumerate(axis_coords):
+
+        # If only one range provided, convert to nested list else leave as is (for problem_space_overlays compatibility)
+        x_ranges = range_list[j] if isinstance(range_list[j][0], list) else [range_list[j]]
+        y_ranges = range_list[i-1] if isinstance(range_list[i-1][0], list) else [range_list[i-1]]
+
+        # get traces and axis parameters for each subplot from problem_space_overlays function
+        traces, x_axis_params, y_axis_params = problem_space_overlays(
+            x_ranges,
+            y_ranges,
+            showlegend=idx == 0,  # Only show each space in legend once
+            **kwargs)
+
+        # Add each trace to appropriate subplot and specify axis params for subplot
+        for trace in traces:
+            self.add_trace(trace, row=i, col=j)
+
+        self.update_xaxes(
+            x_axis_params, row=i, col=j,  # Add axis params from problem_space_overlays method
+            ticks="outside" if i == 1 else None,  # Only place ticks on certain subplots
+            showticklabels=i == 1, tickangle=-45,  # Only place axis label on certain subplots, rotate tickval
+            title=axis_labels[j] if i == 1 else None,  # Only show axis title on certain subplots
+            tickfont=dict(size=11),  # Specify tickval font parameters
+            side = 'top' if i == 1 else None,  # Specify which edge of subplot to place axis labels / title
+            # title_standoff = 40, automargin=False
+        )
+        # self.update_xaxes(
+        #     side='bottom',
+        #     # showticklabels=False,
+        #     title=axis_labels[j],
+        #     overlaying=f'x{j}'
+        # )
+
+        self.update_yaxes(
+            y_axis_params, row=i, col=j,  # Add axis params from problem_space_overlays method
+            ticks="outside" if j == grid_dim else None,  # Only place ticks on certain subplots
+            showticklabels=j == grid_dim, tickangle=0,  # Only place axis label on certain subplots, rotate tickval
+            title=axis_labels[i - 1] if j == grid_dim else None,  # Only show axis title on certain subplots
+            tickfont=dict(size=11),  # Specify tickval font parameters
+            side = 'right' if j == grid_dim else None,  # Specify which edge of subplot to place axis labels / title
+            # title_standoff = 500, automargin=False
+        )
+
+    # Specify common layout paramters
+    self.update_layout(
+        legend=dict(
+            yanchor="bottom",
+            y=0.3,
+            xanchor="left",
+            x=0.3
+        )
+    )
+
+
+##################################################################################################
+##################################################################################################
 if __name__ == "__main__":
     from numpy.random import default_rng
 
