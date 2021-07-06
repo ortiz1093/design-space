@@ -67,20 +67,19 @@ class FormSpace:
 
         import plotly.express as px
 
+        color_grad = df.utility.values
         diag_kind = 'auto' if show_gradient else 'kde'
         self.plot = px.scatter_matrix(
             df,
             dimensions=df.columns[:-1],
-            color=hue)
+            color='utility')
         self.plot.update_traces(
             diagonal_visible=False,
             showupperhalf=False,
             marker=dict(
-                color=kwargs.get('color', 'blue'),
                 size=4, opacity=1.0,
                 showscale=False, # colors encode categorical variables
                 line_color='whitesmoke', line_width=0.5))
-        # self.plot.update_yaxes(matches='y')
 
         # self.plot = sns.pairplot(df, hue=hue, diag_kind=diag_kind,
         #                          corner=True, aspect=1, height=1)
@@ -114,8 +113,8 @@ class FormSpace:
         if self.plot is None:
             self.build_solution_space(**kwargs)
 
-        # plt.show()
-        self.plot.show()
+        plt.show()
+        # self.plot.show()
 
     def points2categorical(self):
         categorical_df = self.categorical_axes.copy(deep=True)

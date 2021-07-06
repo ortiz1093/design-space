@@ -176,6 +176,85 @@ def objective_space(resA, pwrA, sideA, utlA, resB, pwrB, sideB, utlB):
     figSpace.show()
 
 
+def plot_objective(res, pwr, side, utl, soln_mask, label=''):
+    df = pd.DataFrame(
+        np.array([res, pwr, side, utl],).T,
+        columns=['Resolution', 'Power Consumption', 'Side Length', 'Utility']
+    )
+
+    plot_df = df[soln_mask]
+
+    figSpace = px.scatter_3d(
+        plot_df,
+        x='Resolution', y='Power Consumption', z='Side Length',
+        color='Utility',
+        title=f"Design {label} Quality Space",
+        range_color=[0,1])
+    figSpace.update_traces(
+        marker_size=5,
+        marker_line_color='DarkSlateGrey',
+        marker_line_width=0.1)
+    figSpace.update_layout(
+        font_size=10,
+        scene_xaxis_tickfont_size=12,
+        scene_yaxis_tickfont_size=12,
+        scene_zaxis_tickfont_size=12
+    )
+
+    figSpace.show()
+
+
+def soln_space_w_utility(design_obj, soln_mask, util_scores, label=''):
+    df = design_obj.form_space.points_df.astype(float)
+    df['utility'] = util_scores
+    plot_df = df[soln_mask]
+    plot = px.scatter_matrix(
+        plot_df,
+        dimensions=plot_df.columns[:-1],
+        color='utility',
+        range_color=[0,1])
+    plot.update_traces(
+        diagonal_visible=False,
+        showupperhalf=False,
+        marker=dict(
+            size=4, opacity=1.0,
+            showscale=False, # colors encode categorical variables
+            line_color='whitesmoke', line_width=0.5))
+    plot.update_layout(font_size=9)
+    # plot.update_xaxes(tickfont_size=4)
+    # plot.update_yaxes(tickfont_size=4)
+    plot.show()
+
+
+def plot_objective_compare(resA, pwrA, sideA, utlA, soln_maskA, resB, pwrB, sideB, utlB, soln_maskB):
+    dfA = pd.DataFrame(
+        np.array([resA, pwrA, sideA, utlA],).T,
+        columns=['Resolution', 'Power Consumption', 'Side Length', 'Utility']
+    )
+
+    dfB = pd.DataFrame(
+        np.array([resB, pwrB, sideB, utlB],).T,
+        columns=['Resolution', 'Power Consumption', 'Side Length', 'Utility']
+    )
+
+    dfA['Design'] = 'A'
+    dfB['Design'] = 'B'
+    
+    df = pd.concat([dfA[soln_maskA], dfB[soln_maskB]], axis=0, ignore_index=True)
+
+    figSpace = px.scatter_3d(
+        df,
+        x='Resolution', y='Power Consumption', z='Side Length',
+        color='Design',
+        title="Designs A & B Quality Space Comparison")
+    figSpace.update_traces(
+        marker_size=4,
+        marker_line_color='DarkSlateGrey',
+        marker_line_width=0.1)
+
+    figSpace.show()
+
+
 def conformity(form_dict, soln_mask, outlier):
     N_plots = len(form_dict.keys()) - 1
     N = sum(soln_mask)
@@ -324,8 +403,8 @@ def toy_design(num_pts):
     solA = toy_designA.form_space.solution_points
     solB = toy_designB.form_space.solution_points
 
-    dfA = toy_designA.form_space.points_df[solA]
-    dfB = toy_designB.form_space.points_df[solB]
+    # dfA = toy_designA.form_space.points_df[solA]
+    # dfB = toy_designB.form_space.points_df[solB]
 
     # print(solution_space_similarity(toy_designA, toy_designB, num_samples=1_000_000))
 
@@ -346,28 +425,26 @@ def example_design(num_pts):
     reqs_file_A2 = 'example_design_files/example_design_reqs2.json'
     vars_file_A = 'example_design_files/DesignA_coreXY/design_vars_A.json'
     func_file_A = 'example_design_files/DesignA_coreXY/design_funcs_A.json'
-    # criteria_file_A = "/root/ThesisCode/example_design_files/example_design_criteria.json"
 
     reqs_file_B = 'example_design_files/example_design_reqs2.json'
     vars_file_B = 'example_design_files/DesignB_leadScrew/design_vars_B.json'
     func_file_B = 'example_design_files/DesignB_leadScrew/design_funcs_B.json'
-    # criteria_file_B = "/root/ThesisCode/example_design_files/example_design_criteria.json"
 
     # # Generate Design A
-    # designA = Design()
-    # designA.load_requirements_from_json(reqs_file_A)
-    # designA.append_variables_from_json(vars_file_A)
-    # designA.set_map_from_json(func_file_A)
-    # # designA.build_constraint_space()
-    # designA.build_form_space(N=num_pts)
+    designA = Design()
+    designA.load_requirements_from_json(reqs_file_A)
+    designA.append_variables_from_json(vars_file_A)
+    designA.set_map_from_json(func_file_A)
+    # designA.build_constraint_space()
+    designA.build_form_space(N=num_pts)
 
-    # # Generate Design A2
-    # designA2 = Design()
-    # designA2.load_requirements_from_json(reqs_file_A2)
-    # designA2.append_variables_from_json(vars_file_A)
-    # designA2.set_map_from_json(func_file_A)
-    # designA2.build_constraint_space()
-    # designA2.build_form_space(N=num_pts)
+    # Generate Design A2
+    designA2 = Design()
+    designA2.load_requirements_from_json(reqs_file_A2)
+    designA2.append_variables_from_json(vars_file_A)
+    designA2.set_map_from_json(func_file_A)
+    designA2.build_constraint_space()
+    designA2.build_form_space(N=num_pts)
 
     # Generate Design B
     designB = Design()
@@ -377,20 +454,34 @@ def example_design(num_pts):
     designB.build_constraint_space()
     designB.build_form_space(N=num_pts)
 
-    # rgsA = [req.values for req in designA.requirement_set]
-    # rgsB = [req.values for req in designB.requirement_set]
-    # syms = [req.symbol for req in designB.requirement_set]
-    # print(syms)
+    # Solution masks
+    solA = designA2.form_space.solution_points
+    solA2 = designA2.form_space.solution_points
+    solB = designB.form_space.solution_points
+
+    # Get individual and overall utility values
+    resA, pwrA, sideA, utlA = get_objective_pointsA(designA.form_points, solA)
+    resA2, pwrA2, sideA2, utlA2 = get_objective_pointsA(designA2.form_points, solA) 
+    resB, pwrB, sideB, utlB = get_objective_pointsB(designB.form_points, solB)
+
+    div1 = len(utlA)
+    div2 = div1 + len(utlA2)
+    util_unscaled = np.hstack((utlA, utlA2, utlB))
+    util_min, util_max = util_unscaled.min(), util_unscaled.max()
+    util_scaled = (util_unscaled - util_min) / (util_max - util_min)
+    utility_A = util_scaled[:div1]
+    utility_A2 = util_scaled[div1:div2]
+    utility_B = util_scaled[div2:]
+
     # quit()
 
-    # Solution dataframes
-    # solA = designA.form_space.solution_points
-    # solB = designB.form_space.solution_points
+# ########################### Individual and Combined Quality Spaces ####################
+    plot_objective(resA, pwrA, sideA, utility_A, solA, label='A1')
+    plot_objective(resA2, pwrA2, sideA2, utility_A2, solA2, label='A2')
+    plot_objective(resB, pwrB, sideB, utility_B, solB, label='B')
+    plot_objective_compare(resA2, pwrA2, sideA2, utility_A2, solA2, resB, pwrB, sideB, utility_B, solB)
 
-    # resA, pwrA, sideA, utlA = get_objective_pointsA(designA.form_points, solA) 
-    # resB, pwrB, sideB, utlB = get_objective_pointsB(designB.form_points, solB)
-    # objective_space(resA, pwrA, sideA, utlA, resB, pwrB, sideB, utlB)
-
+# ########################### Form Point Conformity ####################
     # x = dict(
     #     s=26,
     #     q=9,
@@ -408,54 +499,54 @@ def example_design(num_pts):
     # )
     # conformity(designA.form_points, solA, x)
 
-    # print(solution_space_similarity(designA, designB, num_samples=num_pts))
 
+# ########################### Caculate Solution Space Similarity ####################
+    print('SA1-SA2 Similarity: ', solution_space_similarity(designA, designA2, num_samples=num_pts))
+
+
+# ########################### Form Points to Problem Space (in progress) ####################
     # plots
-    designB.constraint_space.build_problem_space()
-    C = designB.constraint_space.figure
-    C_pts = designB.constraint_points
+    # designB.constraint_space.build_problem_space()
+    # C = designB.constraint_space.figure
+    # C_pts = designB.constraint_points
     # df = pd.DataFrame(C_pts)
     # df.dG = np.random.uniform(-0.001, 0.001, 5000)
     # C_scatter = px.scatter(df)
     # C.update_traces(C_scatter.data[0])
     # C.show()
 
-    X = C_pts['dG']
-    Y = X * np.random.uniform(-0.001, 0.001, len(X))
-    Y[~X] = Y[~X] + np.random.choice([-1, 1], len(Y[~X]))*np.random.uniform(0.001, 0.01, len(Y[~X]))
-    C_pts['dG'] = Y
-    pts = np.array([arr for arr in C_pts.values()])[:, ::50]
-    axis_labels = [symbol for symbol in C_pts.keys()]
-    rgs = [req.values for req in designB.requirement_set]
+    # X = C_pts['dG']
+    # Y = X * np.random.uniform(-0.001, 0.001, len(X))
+    # Y[~X] = Y[~X] + np.random.choice([-1, 1], len(Y[~X]))*np.random.uniform(0.001, 0.01, len(Y[~X]))
+    # C_pts['dG'] = Y
+    # pts = np.array([arr for arr in C_pts.values()])[:, ::50]
+    # axis_labels = [symbol for symbol in C_pts.keys()]
+    # rgs = [req.values for req in designB.requirement_set]
 
-    fig = go.Figure()
-    fig.points_2_problem_space(pts, rgs, axis_labels=axis_labels)
-    fig.show()
+    # fig = go.Figure()
+    # fig.points_2_problem_space(pts, rgs, axis_labels=axis_labels)
+    # fig.show()
 
-    pass
+    # pass
 
 
+# ########################### Utility gradient on Solution Space ####################
+    soln_space_w_utility(designA, solA, utility_A, label='A1')
+    soln_space_w_utility(designA2, solA2, utility_A2, label='A2')
+    soln_space_w_utility(designB, solB, utility_B, label='B')
 
-    # Scale both utility scores to the same min max
-    # div = len(utlA)
-    # util_scaled = scale(np.hstack((utlA, utlB)))
-    # utlA_scaled = util_scaled[:div]
-    # utlB_scaled = util_scaled[div:]
 
-    # designA.form_space.set_value_gradient(scale(utlA))
-    # designA.plot_solutions(max_dim=15, show_fails=False, show_gradient=True)
-    # designA.form_space.set_value_gradient(utlA_scaled)
-    # designA.plot_solutions(max_dim=15, show_fails=False, show_gradient=True)
-    # designB.form_space.set_value_gradient(utlB_scaled)
-    # designB.plot_solutions(max_dim=15, show_fails=False, show_gradient=True)
-    # pairplot_overlay(solA, solB)
-    # solution_space_overlay(designA, designA2, num_samples=num_pts)
+# ########################### Solution Space Comparison Overlay ####################
+    solution_space_overlay(designA, designA2, num_samples=num_pts)
 
-num_pts = 5_000
 
-print("#"*45)
+if __name__ == "__main__":
 
-# toy_design(num_pts)
-example_design(num_pts)
+    num_pts = 50_000
 
-print("#"*45)
+    print("#"*45)
+
+    # toy_design(num_pts)
+    example_design(num_pts)
+
+    print("#"*45)

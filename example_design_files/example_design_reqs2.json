@@ -31,7 +31,7 @@
 
     "res": {
         "text": "The print nozzle must be capable of achieving a resolution of 0.001 in or less",
-        "allowable range": [0.0, 0.1]
+        "allowable range": [0.0, 0.001]
     }
 }
 

@@ -122,7 +122,7 @@ def test_shared_form_points(designA, designB, samples, return_samples=False):
 
 def solution_space_similarity(designA, designB, **kwargs):
     samples = designA.generate_samples(kwargs['num_samples'])
-    soln_mask_A, soln_mask_B, _ = test_shared_form_points(designA, designB, samples=samples, return_samples=False)
+    soln_mask_A, soln_mask_B = test_shared_form_points(designA, designB, samples=samples, return_samples=False)
 
     # Run similarity measure on masks
     return space_similarity(soln_mask_A, soln_mask_B)

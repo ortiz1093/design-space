@@ -393,27 +393,27 @@ if __name__ == "__main__":
     # ranges = [A_rg1, B_rg1, C_rg1, D_rg1]
     # ranges = [[A_rg1, A_rg2], [B_rg1, B_rg2], [C_rg1, C_rg2], [D_rg1, D_rg2]]
 
-    # rgA = [
-    #     [-0.001, 0.001],
-    #     [-0.001, 0.001],
-    #     [-0.005, 0.005],
-    #     [8.0, np.inf],
-    #     [8.0, np.inf],
-    #     [16.0, np.inf],
-    #     [0.0, 0.001]
-    # ]
-
-    rgB = [
-        [-0.00025, 0.0025],
+    rgA = [
+        [-0.005, 0.005],
         [-0.001, 0.001],
-        [-0.0025, 0.0025],
-        [6.0, 36],
-        [6.0, 36],
-        [18.0, 100],
-        [0.0, 0.003]
+        [-0.005, 0.005],
+        [8.0, 36],
+        [8.0, 36],
+        [16.0, 100],
+        [0.0, 0.001]
     ]
 
-    # ranges = list(zip(rgA, rgB))
+    rgB = [
+        [-0.005, 0.005],
+        [-0.001, 0.001],
+        [-0.005, 0.005],
+        [8.0, 36],
+        [8.0, 36],
+        [8.0, 100],
+        [0.0, 0.001]
+    ]
+
+    ranges = list(zip(rgA, rgB))
     axis_labels = ['dx', 'dG', 'dy', 'Dx', 'Dy', 'v', 'res']
     # axis_labels = ['Frame<br>Deflection<br>X', 'Gantry<br>Deflection', 'Frame<br>Deflection<br>Y', 'X-Travel', 'Y-Travel', 'Max<br>Printhead<br>Velocity', 'Print<br>Head<br>Resolution']
 
@@ -424,8 +424,8 @@ if __name__ == "__main__":
     # in_both = np.logical_and(isinspace(points.T, rgA), isinspace(points.T, rgB))
 
     fig = go.Figure()
-    # fig.problem_space_grid(rgB, axis_labels=axis_labels)
-    fig.points_2_problem_space(ptsB, rgB, axis_labels=axis_labels)
+    fig.problem_space_grid(ranges, axis_labels=axis_labels)
+    # fig.points_2_problem_space(ptsB, rgB, axis_labels=axis_labels)
 
     fig.show()
 
